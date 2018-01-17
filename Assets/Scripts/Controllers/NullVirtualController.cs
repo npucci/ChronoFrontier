@@ -4,19 +4,31 @@ using UnityEngine;
 
 public class NullVirtualController : IVirtualController {
 
-	public virtual void ViewStickInput ( Vector3 input ) {
+	public virtual void ViewStickInput ( 
+		float xViewStickInput,
+		float yViewStickInput
+	) {
 		// do nothing
 	}
 
-	public virtual void MovementStickInput ( Vector3 input ) {
+	public virtual void MovementStickInput (
+		float xMovementStickInput,
+		float yMovementStickInput
+	) {
 		// do nothing
 	}
 
-	public virtual void RunButton ( Vector3 input ) {
+	public virtual void RunButton (
+		float xMovementStickInput,
+		float yMovementStickInput
+	) {
 		// do nothing
 	}
 
-	public virtual void Slide ( Vector3 input ) {
+	public virtual void Slide (
+		float xMovementStickInput,
+		float yMovementStickInput
+	) {
 		// do nothing
 	}
 

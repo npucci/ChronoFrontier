@@ -2,6 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/* Author: Niccolo Pucci
+ * Purpose:
+ * Generic depletable health, 
+ * that can be used for the player and NPC/AI
+*/
+
 public class CombatHealthController : IHealthController {
 	private const float EMPTY_HP = 0.0f;
 	private float currentHP = 100.0f;

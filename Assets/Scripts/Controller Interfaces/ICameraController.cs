@@ -5,17 +5,22 @@ using UnityEngine;
 public interface ICameraController {
 
 	void updateCameraPositioning ( 
-		Vector3 input,
+		float horizontalViewStickInput,
+		float verticalViewStickInput,
 		Vector3 pivotPoint
 	);
 
 	void setCameraMovementSpeed ( float cameraMovementSpeed );
 
-	Quaternion getCameraRotation ();
+	Vector3 getCameraForwardVector ();
 
 	Vector3 getCameraDistanceFromTarget ();
 
 	void setCamera ( Camera Camera );
+
+	Vector3 getCameraForwardDirection ();
+
+	Vector3 getCameraSideDirection ();
 
 	bool hasCamera ();
 }

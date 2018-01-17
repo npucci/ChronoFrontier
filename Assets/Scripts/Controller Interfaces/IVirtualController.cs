@@ -3,13 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public interface IVirtualController {
-	void ViewStickInput ( Vector3 input );
+	void ViewStickInput ( 
+		float xViewStickInput,
+		float yViewStickInput
+	);
 
-	void MovementStickInput ( Vector3 input );
+	void MovementStickInput (
+		float xMovementStickInput,
+		float yMovementStickInput
+	);
 
-	void RunButton ( Vector3 input );
+	void RunButton (
+		float xMovementStickInput,
+		float yMovementStickInput
+	);
 
-	void Slide ( Vector3 input );
+	void Slide (
+		float xMovementStickInput,
+		float yMovementStickInput
+	);
 
 	void JumpButton ();
 

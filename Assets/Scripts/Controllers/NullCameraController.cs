@@ -9,7 +9,8 @@ public class NullCameraController : ICameraController {
 	}
 
 	public virtual void updateCameraPositioning ( 
-		Vector3 input,
+		float horizontalViewStickInput,
+		float verticalViewStickInput,
 		Vector3 pivotPoint
 	) {
 		// do nothing
@@ -20,20 +21,14 @@ public class NullCameraController : ICameraController {
 		// do nothing
 	}
 
-	public virtual Quaternion getCameraRotation () {
-		return new Quaternion (
-			0,
-			0,
-			0,
-			0
-		);
+	public virtual Vector3 getCameraForwardVector () {
+		return Vector3.zero;
 	}
 
 
 	public virtual Vector3 getCameraDistanceFromTarget () {
 		return Vector3.zero;
 	}
-
 
 	public virtual void setCamera ( Camera Camera ) {
 		// do nothing
@@ -43,5 +38,12 @@ public class NullCameraController : ICameraController {
 		return false;
 	}
 
+	public Vector3 getCameraForwardDirection () {
+		return Vector3.zero;
+	}
+
+	public Vector3 getCameraSideDirection () {
+		return Vector3.zero;
+	}
 
 }

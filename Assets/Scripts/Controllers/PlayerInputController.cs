@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerInputController : MonoBehaviour {
-	private const string INPUT_AXIS_HORIZONTAL = "Horizontal";
-	private const string INPUT_AXIS_VERTICAL = "Vertical";
-	private const string INPUT_MOUSE_X = "Mouse X";
-	private const string INPUT_MOUSE_Y = "Mouse Y";
+	private const string INPUT_MOVEMENT_STICK_HORIZONTAL = "Horizontal";
+	private const string INPUT_MOVEMENT_STICK_VERTICAL = "Vertical";
+
+	private const string INPUT_VIEW_STICK_HORIZONTAL = "Mouse X";
+	private const string INPUT_VIEW_STICK_VERTICAL = "Mouse Y";
+
 	private const string INPUT_JUMP_BUTTON = "Jump";
 
-	float xMovementAxisInput = 0.0f;
-	float zMovementAxisInput = 0.0f;
-	float xMouseInput = 0.0f;
-	float yMouseInput = 0.0f;
+	float horizontalMovementStickInput = 0.0f;
+	float verticalMovementStickInput = 0.0f;
+
+	float horizontalViewStickInput = 0.0f;
+	float verticalViewStickInput = 0.0f;
 
 	private IVirtualController virtualController;
 		
@@ -26,11 +29,11 @@ public class PlayerInputController : MonoBehaviour {
 		
 	// player input
 	void Update () {
-		xMovementAxisInput = Input.GetAxis ( INPUT_AXIS_HORIZONTAL );
-		zMovementAxisInput = Input.GetAxis ( INPUT_AXIS_VERTICAL );
+		horizontalMovementStickInput = Input.GetAxis ( INPUT_MOVEMENT_STICK_HORIZONTAL );
+		verticalMovementStickInput = Input.GetAxis ( INPUT_MOVEMENT_STICK_VERTICAL );
 
-		xMouseInput += Input.GetAxis ( INPUT_MOUSE_X );
-		yMouseInput -= Input.GetAxis ( INPUT_MOUSE_Y );
+		horizontalViewStickInput += Input.GetAxis ( INPUT_VIEW_STICK_HORIZONTAL );
+		verticalViewStickInput -= Input.GetAxis ( INPUT_VIEW_STICK_VERTICAL );
 	}
 
 	void LateUpdate () {
@@ -39,23 +42,16 @@ public class PlayerInputController : MonoBehaviour {
 
 	// rigidbody and physics calculations 
 	void FixedUpdate () {
-		Vector3 input = new Vector3 (
-			xMovementAxisInput,
-			0.0f,
-			zMovementAxisInput
+		
+		virtualController.MovementStickInput (
+			horizontalMovementStickInput,
+			verticalMovementStickInput
 		);
-			
-		bool hasInput = xMovementAxisInput != 0.0f || zMovementAxisInput != 0.0f; 
 
-		if ( hasInput ) {
-			virtualController.MovementStickInput ( input );
-		}
-
-		virtualController.ViewStickInput ( new Vector3 (
-			yMouseInput, 
-			xMouseInput,
-			0.0f
-		) );
+		virtualController.ViewStickInput (
+			horizontalViewStickInput, 
+			verticalViewStickInput
+		);
 
 		if ( Input.GetButtonDown ( INPUT_JUMP_BUTTON ) ) {
 			virtualController.JumpButton ();
