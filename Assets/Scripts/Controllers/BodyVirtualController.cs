@@ -17,10 +17,10 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 	private Rigidbody rigidBody;
 	private float bodyMass = 54.0f;
 
-	private float cameraSpeed = 3.0f;
+	private float cameraSpeed = 8.2f;
 
 	private float movementSpeed = 12.0f;
-	private float turnSpeed = 0.2f;
+	private float turnSpeed = 15.2f;
 	private float jumpSpeed = 10.0f;
 
 	void Start () {
@@ -134,8 +134,8 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		float horizontalMovementStickInput,
 		float verticalMovementStickInput
 	) {
-		bool noMovementInput = horizontalMovementStickInput == 0.0f && verticalMovementStickInput == 0.0f;
-		if ( rigidBody == null || noMovementInput ) {
+		
+		if ( rigidBody == null ) {
 			return;
 		}
 
@@ -164,13 +164,17 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 				newVelocity, 
 				Vector3.up 
 			),
-			turnSpeed 
+			turnSpeed * Time.deltaTime
 		);
 
-		// 8. apply new rotation to rigidBody 
+		// 8. maintain original xz-axis rotation
+		newRotation.x = rigidBody.rotation.x;
+		newRotation.z = rigidBody.rotation.z;
+
+		// 9. apply new rotation to rigidBody 
 		rigidBody.rotation = newRotation;
 
-		// 9. apply new velocity to rigidBody
+		// 10. apply new velocity to rigidBody
 		rigidBody.velocity = newVelocity;
 	}
 

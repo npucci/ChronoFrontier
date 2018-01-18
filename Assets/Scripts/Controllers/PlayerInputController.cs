@@ -42,11 +42,14 @@ public class PlayerInputController : MonoBehaviour {
 
 	// rigidbody and physics calculations 
 	void FixedUpdate () {
-		
-		virtualController.MovementStickInput (
-			horizontalMovementStickInput,
-			verticalMovementStickInput
-		);
+
+		bool newMovementInput = horizontalMovementStickInput != 0.0f || verticalMovementStickInput != 0.0f;
+		if ( newMovementInput ) {
+			virtualController.MovementStickInput (
+				horizontalMovementStickInput,
+				verticalMovementStickInput
+			);
+		}
 
 		virtualController.ViewStickInput (
 			horizontalViewStickInput, 

@@ -44,7 +44,7 @@ public class ThirdPersonCameraController : ICameraController {
 		Quaternion newRotation = Quaternion.Slerp (
 			camera.transform.rotation,
 			Quaternion.Euler ( desiredRotation ),
-			cameraMovementSpeed
+			cameraMovementSpeed * Time.deltaTime
 		);
 
 		//newRotation = Quaternion.Euler ( desiredRotation );
