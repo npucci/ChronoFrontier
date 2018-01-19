@@ -23,6 +23,30 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 	private float turnSpeed = 15.2f;
 	private float jumpSpeed = 10.0f;
 
+	private BodyState bodyState = BodyState.Idle;
+
+	// vertical state: grounded, falling, rising
+	// movement state: running, walking, jumping, sliding, none
+	// activity state: sleeping, interacting, attacking, moving, idle
+	// combat state: sword attacking, magic attacking, time slowing, time pausing, time stopping
+	// time state: time slowed, time paused, time stopped
+
+	private enum BodyState {
+		Idle,
+		Walking,
+		Running,
+		Moving,
+		Jumping,
+		Sliding,
+		Sleeping,
+		SwordAttacking,
+		MagicAttacking,
+		Interacting,
+		TimeSlowing,
+		TimePausing,
+		TimeStopping
+	}
+
 	void Start () {
 		healthController = new CombatHealthController ();
 		interactionController = new NullInteractionController ();
@@ -37,7 +61,19 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 	}
 
 	void Update () {
+		bool noVelocity = rigidBody.velocity.x == 0.0f && 
+			rigidBody.velocity.y == 0.0f && 
+			rigidBody.velocity.z == 0.0f;
+		
+		if ( noVelocity ) {
+			bodyState = BodyState.Idle;
+		} 
 
+		else {
+			bodyState = BodyState.Moving;
+		}
+
+		Debug.Log ( "bodyState = " + bodyState );
 	}
 
 	void LateUpdate () {
@@ -77,6 +113,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 			horizontalMovementStickInput,
 			verticalMovementStickInput
 		);
+		bodyState = BodyState.Running;
 	}
 
 	public virtual void Slide (
@@ -87,6 +124,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 			horizontalMovementStickInput,
 			verticalMovementStickInput
 		);
+		bodyState = BodyState.Sliding;
 	}
 
 	public virtual void JumpButton () {
@@ -108,26 +146,27 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		);
 
 		rigidBody.velocity = jumpVelocity;
+		bodyState = BodyState.Jumping;
 	}
 
 	public virtual void InteractionButton () {
-
+		bodyState = BodyState.Interacting;
 	}
 
 	public virtual void MagicButton () {
-
+		bodyState = BodyState.MagicAttacking;
 	}
 
 	public virtual void TimeSlowButton () {
-
+		bodyState = BodyState.TimeSlowing;
 	}
 
 	public virtual void TimePauseButton () {
-
+		bodyState = BodyState.TimePausing;
 	}
 
 	public virtual void TimeStopButton () {
-
+		bodyState = BodyState.TimeStopping;
 	}
 
 	private void Move (
@@ -177,27 +216,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		// 10. apply new velocity to rigidBody
 		rigidBody.velocity = newVelocity;
 	}
-
-	private void rotateBodyWithCameraView () {
-		if (rigidBody == null) {
-			return;
-		}
-			
-		Vector3 cameraRotation = Vector3.zero;// cameraController.getCameraRotation ().eulerAngles;
-		Vector3 newRotation = new Vector3 (
-			rigidBody.rotation.x, 
-			cameraRotation.y, 
-			rigidBody.rotation.z
-		);
-
-		rigidBody.rotation = Quaternion.Slerp ( 
-			rigidBody.rotation,
-			Quaternion.Euler ( newRotation ),
-			turnSpeed * Time.deltaTime
-		);
-
-	}
-
+		
 	private bool onGround () {
 		return rigidBody.velocity [ 1 ] == 0.0f;
 	}
