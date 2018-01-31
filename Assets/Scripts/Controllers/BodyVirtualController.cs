@@ -19,7 +19,13 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 
 	private float cameraSpeed = 8.2f;
 
-	private float movementSpeed = 12.0f;
+	private float normalSpeed = 12.0f;
+
+	private float runSpeedMax = 5.0f;
+	private float runSpeedIncrement = 0.5f;
+
+	private float runSpeedCurrent = 0.0f;
+
 	private float turnSpeed = 15.2f;
 	private float jumpSpeed = 10.0f;
 
@@ -72,10 +78,6 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 			bodyState = BodyState.Idle;
 		} 
 
-		else {
-			bodyState = BodyState.Moving;
-		}
-
 		Debug.Log ( "bodyState = " + bodyState );
 	}
 
@@ -102,17 +104,36 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		float horizontalMovementStickInput,
 		float verticalMovementStickInput
 	) {
-		Move ( 
+		if ( 0.0f < runSpeedCurrent ) {
+			runSpeedCurrent -= runSpeedIncrement;
+
+			if ( runSpeedCurrent < 0.0f ) {
+				runSpeedCurrent = 0.0f;
+			}
+		} 
+
+		Move (
+			normalSpeed + runSpeedCurrent,
 			horizontalMovementStickInput,
 			verticalMovementStickInput
 		);
+		bodyState = BodyState.Moving;
 	}
 
 	public virtual void RunButton (
 		float horizontalMovementStickInput,
 		float verticalMovementStickInput
 	) {
-		Move ( 
+		if ( runSpeedCurrent < runSpeedMax ) {
+			runSpeedCurrent += runSpeedIncrement;
+
+			if ( runSpeedMax < runSpeedCurrent ) {
+				runSpeedCurrent = runSpeedMax;
+			}
+		}
+
+		Move (
+			normalSpeed + runSpeedCurrent,
 			horizontalMovementStickInput,
 			verticalMovementStickInput
 		);
@@ -124,6 +145,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		float verticalMovementStickInput
 	) {
 		Move ( 
+			normalSpeed,
 			horizontalMovementStickInput,
 			verticalMovementStickInput
 		);
@@ -173,6 +195,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 	}
 
 	private void Move (
+		float movementSpeed,
 		float horizontalMovementStickInput,
 		float verticalMovementStickInput
 	) {
@@ -225,10 +248,10 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 	}
 
 	void OnCollisionEnter ( Collision collision ) {
-		Debug.Log ( "VirtualBody OnCollisionEnter!" );
+		//Debug.Log ( "VirtualBody OnCollisionEnter!" );
 	}
 
 	void OnTriggerEnter ( Collider collider ) {
-		Debug.Log ( "VirtualBody OnTriggerEnter!" );
+		//Debug.Log ( "VirtualBody OnTriggerEnter!" );
 	}
 }

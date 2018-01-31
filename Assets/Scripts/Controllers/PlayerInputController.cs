@@ -10,6 +10,7 @@ public class PlayerInputController : MonoBehaviour {
 	private const string INPUT_VIEW_STICK_VERTICAL = "Mouse Y";
 
 	private const string INPUT_JUMP_BUTTON = "Jump";
+	private const string INPUT_RUN_BUTTON = "Run";
 
 	float horizontalMovementStickInput = 0.0f;
 	float verticalMovementStickInput = 0.0f;
@@ -20,7 +21,6 @@ public class PlayerInputController : MonoBehaviour {
 	private IVirtualController virtualController;
 		
 	void Start () {
-		
 		virtualController = GetComponent < IVirtualController > ();
 		if ( virtualController == null ) {
 			virtualController = new NullVirtualController ();
@@ -42,13 +42,22 @@ public class PlayerInputController : MonoBehaviour {
 
 	// rigidbody and physics calculations 
 	void FixedUpdate () {
-
 		bool newMovementInput = horizontalMovementStickInput != 0.0f || verticalMovementStickInput != 0.0f;
 		if ( newMovementInput ) {
-			virtualController.MovementStickInput (
-				horizontalMovementStickInput,
-				verticalMovementStickInput
-			);
+			if ( Input.GetButton ( INPUT_RUN_BUTTON ) ) {
+				Debug.Log ( "running button" );
+				virtualController.RunButton (
+					horizontalMovementStickInput,
+					verticalMovementStickInput
+				);
+			} 
+
+			else {
+				virtualController.MovementStickInput (
+					horizontalMovementStickInput,
+					verticalMovementStickInput
+				);
+			}
 		}
 
 		virtualController.ViewStickInput (
@@ -59,6 +68,7 @@ public class PlayerInputController : MonoBehaviour {
 		if ( Input.GetButtonDown ( INPUT_JUMP_BUTTON ) ) {
 			virtualController.JumpButton ();
 		}
+			
 	}
 
 
