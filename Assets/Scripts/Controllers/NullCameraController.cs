@@ -30,14 +30,6 @@ public class NullCameraController : ICameraController {
 		return Vector3.zero;
 	}
 
-	public virtual void setCamera ( Camera Camera ) {
-		// do nothing
-	}
-		
-	public virtual bool hasCamera () {
-		return false;
-	}
-
 	public Vector3 getCameraForwardDirection () {
 		return Vector3.zero;
 	}

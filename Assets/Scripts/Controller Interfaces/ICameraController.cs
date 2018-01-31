@@ -16,11 +16,7 @@ public interface ICameraController {
 
 	Vector3 getCameraDistanceFromTarget ();
 
-	void setCamera ( Camera Camera );
-
 	Vector3 getCameraForwardDirection ();
 
 	Vector3 getCameraSideDirection ();
-
-	bool hasCamera ();
 }

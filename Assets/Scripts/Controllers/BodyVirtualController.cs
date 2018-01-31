@@ -50,7 +50,10 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 	void Start () {
 		healthController = new CombatHealthController ();
 		interactionController = new NullInteractionController ();
-		cameraController = new ThirdPersonCameraController ( cameraSpeed );
+		cameraController = Camera.main.GetComponent < ICameraController > ();
+		if ( cameraController == null) {
+			cameraController = new NullCameraController ();
+		}
 
 		rigidBody = GetComponent < Rigidbody > ();
 		if ( rigidBody != null ) {
@@ -200,7 +203,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		Quaternion newRotation = Quaternion.Slerp ( 
 			rigidBody.rotation,
 			Quaternion.LookRotation ( 
-				newVelocity, 
+				newVelocity.normalized, 
 				Vector3.up 
 			),
 			turnSpeed * Time.deltaTime
@@ -219,5 +222,13 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		
 	private bool onGround () {
 		return rigidBody.velocity [ 1 ] == 0.0f;
+	}
+
+	void OnCollisionEnter ( Collision collision ) {
+		Debug.Log ( "VirtualBody OnCollisionEnter!" );
+	}
+
+	void OnTriggerEnter ( Collider collider ) {
+		Debug.Log ( "VirtualBody OnTriggerEnter!" );
 	}
 }

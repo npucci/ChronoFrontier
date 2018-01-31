@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ThirdPersonCameraController : ICameraController {
-	private Camera camera;
+public class ThirdPersonCameraController : MonoBehaviour , ICameraController {
 	private float cameraMovementSpeed;
 	private Vector3 cameraAngleFromTarget;
-
 	private Vector3 cameraDistanceFromTarget;
 
-	public ThirdPersonCameraController ( float movementSpeed ) {
+	void Awake () {
 		setCameraAngleFromTarget ( new Vector3 (
 			15.0f,
 			0.0f,
@@ -22,8 +20,9 @@ public class ThirdPersonCameraController : ICameraController {
 			-5.0f
 		) );
 
-		setCamera ( Camera.main );
-		setCameraMovementSpeed ( movementSpeed );
+		cameraMovementSpeed = 15.0f;
+
+		setColliderAndRigidbody ();
 	}
 
 	public virtual void updateCameraPositioning ( 
@@ -31,27 +30,27 @@ public class ThirdPersonCameraController : ICameraController {
 		float verticalViewStickInput,
 		Vector3 pivotPoint
 	) {
-		if ( camera == null ) {
-			return;
-		}
-			
 		Vector3 desiredRotation = new Vector3 (
 			verticalViewStickInput * cameraMovementSpeed,
 			horizontalViewStickInput * cameraMovementSpeed,
 			0.0f
 		);
 
+		float currentXAngle = transform.rotation.eulerAngles.x;
+		if ( 320.0f < currentXAngle && currentXAngle < 360.0f && verticalViewStickInput < 0.0f ) {
+			desiredRotation.x = currentXAngle;
+		}
+
 		Quaternion newRotation = Quaternion.Slerp (
-			camera.transform.rotation,
+			transform.rotation,
 			Quaternion.Euler ( desiredRotation ),
 			cameraMovementSpeed * Time.deltaTime
 		);
+			
+		Vector3 newPosition = pivotPoint + ( newRotation * cameraDistanceFromTarget );
 
-		//newRotation = Quaternion.Euler ( desiredRotation );
-		camera.transform.rotation = newRotation;
-
-		Vector3 newPosition = pivotPoint + (newRotation * cameraDistanceFromTarget );
-		camera.transform.position = newPosition;
+		transform.rotation = newRotation;
+		transform.position = newPosition;
 	}
 
 	public virtual void setCameraMovementSpeed ( float cameraMovementSpeed ) {
@@ -59,8 +58,7 @@ public class ThirdPersonCameraController : ICameraController {
 	}
 
 	public virtual Vector3 getCameraForwardVector () {
-		Vector3 forwardDirection = camera.transform.forward;
-		//Vector3 forwardDirection = camera.transform.rotation.eulerAngles;
+		Vector3 forwardDirection = transform.forward;
 		return forwardDirection;
 	}
 
@@ -72,17 +70,6 @@ public class ThirdPersonCameraController : ICameraController {
 		return cameraAngleFromTarget;
 	}
 
-	public virtual void setCamera ( Camera camera ) {
-		if ( camera == null ) {
-			camera = new Camera ();
-		}
-
-		this.camera = camera;
-	}
-
-	public virtual bool hasCamera () {
-		return  camera != null;
-	}
 
 	private void setCameraDistanceFromTarget ( Vector3 cameraDistanceFromTarget ) {
 		this.cameraDistanceFromTarget = cameraDistanceFromTarget;
@@ -93,17 +80,44 @@ public class ThirdPersonCameraController : ICameraController {
 	}
 
 	public Vector3 getCameraForwardDirection () {
-		Vector3 cameraForwardDirection = camera.transform.forward;
+		Vector3 cameraForwardDirection = transform.forward;
 		cameraForwardDirection.y = 0.0f;
 		// return only x and z axis information
 		return cameraForwardDirection;
 	}
 
 	public Vector3 getCameraSideDirection () {
-		Vector3 cameraSideDirection = camera.transform.right;
+		Vector3 cameraSideDirection = transform.right;
 		cameraSideDirection.y = 0.0f;
 		// return only x and z axis information
 		return cameraSideDirection;
+	}
+
+	public void setColliderAndRigidbody () {
+		if ( GetComponent < Camera > () == null ) {
+			return;
+		} 
+
+		SphereCollider cameraCollider = GetComponent < SphereCollider > ();
+		if ( cameraCollider == null ) {
+			cameraCollider = gameObject.AddComponent ( typeof ( SphereCollider ) ) as SphereCollider;
+		}
+		cameraCollider.isTrigger = true;
+
+		Rigidbody cameraRigidBody = GetComponent < Rigidbody > ();
+		if ( cameraRigidBody == null ) {
+			cameraRigidBody = gameObject.AddComponent ( typeof ( Rigidbody ) ) as Rigidbody;
+		}
+		cameraRigidBody.isKinematic = true;
+		//cameraRigidBody.useGravity = false;
+	}
+
+	void OnCollisionEnter ( Collision collision ) {
+		Debug.Log ( "OnCollisionEnter!" );
+	}
+
+	void OnTriggerEnter ( Collider collider ) {
+		Debug.Log ( "OnTriggerEnter!" );
 	}
 
 }
