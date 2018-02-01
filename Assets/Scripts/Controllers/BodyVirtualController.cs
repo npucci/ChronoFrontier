@@ -124,7 +124,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		float horizontalMovementStickInput,
 		float verticalMovementStickInput
 	) {
-		if ( runSpeedCurrent < runSpeedMax ) {
+		if ( onGround () && runSpeedCurrent < runSpeedMax ) {
 			runSpeedCurrent += runSpeedIncrement;
 
 			if ( runSpeedMax < runSpeedCurrent ) {
