@@ -244,7 +244,17 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 	}
 		
 	private bool onGround () {
-		return rigidBody.velocity [ 1 ] == 0.0f;
+		Vector3 down = transform.TransformDirection ( Vector3.down );
+	
+		if ( Physics.Raycast (
+			rigidBody.position,
+			down,
+			1.0f
+		) ) {
+			return true;
+		}
+
+		return rigidBody.velocity.y == 0.0f;
 	}
 
 	void OnCollisionEnter ( Collision collision ) {
