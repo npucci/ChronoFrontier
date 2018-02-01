@@ -7,7 +7,7 @@ public class ThirdPersonCameraController : MonoBehaviour , ICameraController {
 	private Vector3 cameraAngleFromTarget;
 	private Vector3 cameraDistanceFromTarget;
 
-	void Awake () {
+	void Start () {
 		setCameraAngleFromTarget ( new Vector3 (
 			15.0f,
 			0.0f,
@@ -37,7 +37,11 @@ public class ThirdPersonCameraController : MonoBehaviour , ICameraController {
 		);
 
 		float currentXAngle = transform.rotation.eulerAngles.x;
-		if ( 320.0f < currentXAngle && currentXAngle < 360.0f && verticalViewStickInput < 0.0f ) {
+		bool angleTooLow = 320.0f < currentXAngle && 
+			currentXAngle < 360.0f && 
+			verticalViewStickInput < 0.0f;
+
+		if ( angleTooLow ) {
 			desiredRotation.x = currentXAngle;
 		}
 
@@ -109,7 +113,6 @@ public class ThirdPersonCameraController : MonoBehaviour , ICameraController {
 			cameraRigidBody = gameObject.AddComponent ( typeof ( Rigidbody ) ) as Rigidbody;
 		}
 		cameraRigidBody.isKinematic = true;
-		//cameraRigidBody.useGravity = false;
 	}
 
 	void OnCollisionEnter ( Collision collision ) {

@@ -11,11 +11,14 @@ using UnityEngine;
 
 public class BodyVirtualController : MonoBehaviour , IVirtualController {
 	private IHealthController healthController;
+	private ICombatController combatController;
 	private IInteractionController interactionController;
 	private ICameraController cameraController;
 
 	private Rigidbody rigidBody;
 	private float bodyMass = 54.0f;
+	private float drag = 0.5f;
+	private float angularDrag = 0.5f;
 
 	private float cameraSpeed = 8.2f;
 
@@ -28,6 +31,10 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 
 	private float turnSpeed = 15.2f;
 	private float jumpSpeed = 10.0f;
+
+	private float maxHP = 100.0f;
+	private float currentHP = 100.0f;
+	private float attackDamage = 15.0f;
 
 	private BodyState bodyState = BodyState.Idle;
 
@@ -54,16 +61,34 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 	}
 
 	void Start () {
-		healthController = new CombatHealthController ();
-		interactionController = new NullInteractionController ();
+		healthController = GetComponent < IHealthController > ();
+		if ( healthController == null ) {
+			healthController = gameObject.AddComponent < NullHealthController > ();
+		}
+		healthController.SetCurrentHP ( currentHP );
+		healthController.SetMaxHP ( maxHP );
+
+		combatController = GetComponent < ICombatController > ();
+		if ( combatController == null ) {
+			combatController = gameObject.AddComponent < NullCombatController > ();
+		}
+		combatController.SetAttackDamage (attackDamage);
+
+		interactionController = Camera.main.GetComponent < IInteractionController > ();
+		if ( interactionController == null ) {
+			interactionController = gameObject.AddComponent < NullInteractionController > ();
+		}
+
 		cameraController = Camera.main.GetComponent < ICameraController > ();
-		if ( cameraController == null) {
-			cameraController = new NullCameraController ();
+		if ( cameraController == null ) {
+			cameraController = gameObject.AddComponent < NullCameraController > ();
 		}
 
 		rigidBody = GetComponent < Rigidbody > ();
 		if ( rigidBody != null ) {
 			rigidBody.mass = bodyMass;
+			rigidBody.drag = drag;
+			rigidBody.angularDrag = angularDrag;
 			rigidBody.freezeRotation = true;
 			rigidBody.isKinematic = false;
 		}

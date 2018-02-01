@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public interface IHealthController {
-
 	void IncreaseHP ( float health );
 	void DecreaseHP ( float damage );
 	void SetMaxHP ( float maxHealthPoints );

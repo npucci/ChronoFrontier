@@ -2,12 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NullCameraController : ICameraController {
-
-	public NullCameraController () {
-		// do nothing
-	}
-
+public class NullCameraController : MonoBehaviour , ICameraController {
 	public virtual void updateCameraPositioning ( 
 		float horizontalViewStickInput,
 		float verticalViewStickInput,

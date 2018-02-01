@@ -8,24 +8,15 @@ using UnityEngine;
  * that can be used for the player and NPC/AI
 */
 
-public class CombatHealthController : IHealthController {
-	private const float EMPTY_HP = 0.0f;
-	private float currentHP = 100.0f;
-	private float maxHP = 100.0f;
+public class CombatHealthController : MonoBehaviour , IHealthController {
+	private float emptyHP;
+	private float currentHP;
+	private float maxHP;
 
-	public CombatHealthController () : this (
-		100.0f,
-		100.0f
-	) {
-		// do nothing
-	}
-
-	public CombatHealthController (
-		float currentHP,
-		float maxHP
-	) {
-		this.currentHP = currentHP;
-		this.maxHP = maxHP;
+	void Start () {
+		emptyHP = 0.0f;
+		currentHP = 100.0f;
+		maxHP = 100.0f;
 	}
 
 	public virtual void IncreaseHP ( float health ) {
@@ -39,8 +30,8 @@ public class CombatHealthController : IHealthController {
 	public virtual void DecreaseHP ( float damage ) {
 		currentHP -= damage;
 
-		if ( currentHP < EMPTY_HP ) {
-			currentHP = EMPTY_HP;
+		if ( currentHP < emptyHP ) {
+			currentHP = emptyHP;
 		}
 	}
 
@@ -69,6 +60,6 @@ public class CombatHealthController : IHealthController {
 	}
 
 	private bool validHPValue ( float healthPoints ) {
-		return  EMPTY_HP <= healthPoints && healthPoints <= maxHP;
+		return  emptyHP <= healthPoints && healthPoints <= maxHP;
 	}
 }
