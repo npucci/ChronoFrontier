@@ -3,24 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public interface IVirtualController {
-	void ViewStickInput ( 
-		float xViewStickInput,
-		float yViewStickInput
-	);
-
 	void MovementStickInput (
 		float xMovementStickInput,
-		float yMovementStickInput
+		float yMovementStickInput,
+		Vector3 forwardDirection,
+		Vector3 sideDirection
 	);
 
 	void RunButton (
 		float xMovementStickInput,
-		float yMovementStickInput
+		float yMovementStickInput,
+		Vector3 forwardDirection,
+		Vector3 sideDirection
 	);
 
 	void Slide (
 		float xMovementStickInput,
-		float yMovementStickInput
+		float yMovementStickInput,
+		Vector3 forwardDirection,
+		Vector3 sideDirection
 	);
 
 	void JumpButton ();
@@ -35,4 +36,7 @@ public interface IVirtualController {
 
 	void TimeStopButton ();
 
+	void TimeStatusEffect ( float slowDownEffect );
+
+	Vector3 GetPosition ();
 }

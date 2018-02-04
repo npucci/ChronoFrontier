@@ -4,30 +4,33 @@ using UnityEngine;
 
 public class NullVirtualController : IVirtualController {
 
-	public virtual void ViewStickInput ( 
-		float xViewStickInput,
-		float yViewStickInput
-	) {
+	public virtual void SetCameraController ( ICameraController cameraController ) {
 		// do nothing
 	}
 
 	public virtual void MovementStickInput (
 		float xMovementStickInput,
-		float yMovementStickInput
+		float yMovementStickInput,
+		Vector3 forwardDirection,
+		Vector3 sideDirection
 	) {
 		// do nothing
 	}
 
 	public virtual void RunButton (
 		float xMovementStickInput,
-		float yMovementStickInput
+		float yMovementStickInput,
+		Vector3 forwardDirection,
+		Vector3 sideDirection
 	) {
 		// do nothing
 	}
 
 	public virtual void Slide (
 		float xMovementStickInput,
-		float yMovementStickInput
+		float yMovementStickInput,
+		Vector3 forwardDirection,
+		Vector3 sideDirection
 	) {
 		// do nothing
 	}
@@ -54,5 +57,13 @@ public class NullVirtualController : IVirtualController {
 
 	public virtual void TimeStopButton () {
 		// do nothing
+	}
+
+	public virtual void TimeStatusEffect ( float slowDownEffect ) {
+		// do nothing
+	}
+
+	public Vector3 GetPosition () {
+		return Vector3.zero;
 	}
 }

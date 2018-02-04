@@ -12,7 +12,7 @@ public interface ICameraController {
 
 	void setCameraMovementSpeed ( float cameraMovementSpeed );
 
-	Vector3 getCameraForwardVector ();
+	void MoveCameraToTarget ( Vector3 targetPosition );
 
 	Vector3 getCameraDistanceFromTarget ();
 

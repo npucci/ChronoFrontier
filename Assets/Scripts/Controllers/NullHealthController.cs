@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NullHealthController : MonoBehaviour , IHealthController {
+public class NullHealthController : IHealthController {
 	public virtual void IncreaseHP ( float health ) {
 		// do nothing
 	}

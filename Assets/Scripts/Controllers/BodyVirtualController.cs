@@ -13,14 +13,12 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 	private IHealthController healthController;
 	private ICombatController combatController;
 	private IInteractionController interactionController;
-	private ICameraController cameraController;
+	private ITimeManipulatorController timeManipulatorController;
 
 	private Rigidbody rigidBody;
 	private float bodyMass = 54.0f;
 	private float drag = 0.5f;
 	private float angularDrag = 0.5f;
-
-	private float cameraSpeed = 8.2f;
 
 	private float normalSpeed = 12.0f;
 
@@ -35,8 +33,10 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 	private float maxHP = 100.0f;
 	private float currentHP = 100.0f;
 	private float attackDamage = 15.0f;
+	private float slowDownEffect = 1.0f; 
 
 	private BodyState bodyState = BodyState.Idle;
+	private ActivityState activityState = ActivityState.Idle;
 
 	// vertical state: grounded, falling, rising
 	// movement state: running, walking, jumping, sliding, none
@@ -51,7 +51,11 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		Moving,
 		Jumping,
 		Sliding,
-		Sleeping,
+		Sleeping
+	}
+
+	private enum ActivityState {
+		Idle,
 		SwordAttacking,
 		MagicAttacking,
 		Interacting,
@@ -60,37 +64,39 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		TimeStopping
 	}
 
+
 	void Start () {
+		rigidBody = GetComponent < Rigidbody > ();
+		if ( rigidBody == null ) {
+			rigidBody = gameObject.AddComponent < Rigidbody > ();
+		}
+		rigidBody.mass = bodyMass;
+		rigidBody.drag = drag;
+		rigidBody.angularDrag = angularDrag;
+		rigidBody.freezeRotation = true;
+		rigidBody.isKinematic = false;
+
 		healthController = GetComponent < IHealthController > ();
 		if ( healthController == null ) {
-			healthController = gameObject.AddComponent < NullHealthController > ();
+			healthController = new NullHealthController ();
 		}
 		healthController.SetCurrentHP ( currentHP );
 		healthController.SetMaxHP ( maxHP );
 
 		combatController = GetComponent < ICombatController > ();
 		if ( combatController == null ) {
-			combatController = gameObject.AddComponent < NullCombatController > ();
+			combatController = new NullCombatController ();
 		}
 		combatController.SetAttackDamage (attackDamage);
 
-		interactionController = Camera.main.GetComponent < IInteractionController > ();
+		interactionController = GetComponent < IInteractionController > ();
 		if ( interactionController == null ) {
-			interactionController = gameObject.AddComponent < NullInteractionController > ();
+			interactionController = new NullInteractionController ();
 		}
-
-		cameraController = Camera.main.GetComponent < ICameraController > ();
-		if ( cameraController == null ) {
-			cameraController = gameObject.AddComponent < NullCameraController > ();
-		}
-
-		rigidBody = GetComponent < Rigidbody > ();
-		if ( rigidBody != null ) {
-			rigidBody.mass = bodyMass;
-			rigidBody.drag = drag;
-			rigidBody.angularDrag = angularDrag;
-			rigidBody.freezeRotation = true;
-			rigidBody.isKinematic = false;
+			
+		timeManipulatorController = GetComponent < ITimeManipulatorController > ();
+		if ( timeManipulatorController == null ) {
+			timeManipulatorController = new NullTimeManipulatorController ();
 		}
 	}
 
@@ -103,31 +109,18 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 			bodyState = BodyState.Idle;
 		} 
 
-		Debug.Log ( "bodyState = " + bodyState );
+		//Debug.Log ( "bodyState = " + bodyState );
 	}
 
 	void LateUpdate () {
 		
 	}
 
-	public virtual void ViewStickInput (
-		float xViewStickInput,
-		float yViewStickInput
-	) {
-		if (rigidBody == null) {
-			return;
-		}
-
-		cameraController.updateCameraPositioning ( 
-			xViewStickInput,
-			yViewStickInput, 
-			rigidBody.position
-		);
-	}
-
 	public virtual void MovementStickInput (
 		float horizontalMovementStickInput,
-		float verticalMovementStickInput
+		float verticalMovementStickInput,
+		Vector3 forwardDirection,
+		Vector3 sideDirection
 	) {
 		if ( 0.0f < runSpeedCurrent ) {
 			runSpeedCurrent -= runSpeedIncrement;
@@ -140,14 +133,18 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		Move (
 			normalSpeed + runSpeedCurrent,
 			horizontalMovementStickInput,
-			verticalMovementStickInput
+			verticalMovementStickInput,
+			forwardDirection,
+			sideDirection
 		);
 		bodyState = BodyState.Moving;
 	}
 
 	public virtual void RunButton (
 		float horizontalMovementStickInput,
-		float verticalMovementStickInput
+		float verticalMovementStickInput,
+		Vector3 forwardDirection,
+		Vector3 sideDirection
 	) {
 		if ( onGround () && runSpeedCurrent < runSpeedMax ) {
 			runSpeedCurrent += runSpeedIncrement;
@@ -160,19 +157,25 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		Move (
 			normalSpeed + runSpeedCurrent,
 			horizontalMovementStickInput,
-			verticalMovementStickInput
+			verticalMovementStickInput,
+			forwardDirection,
+			sideDirection
 		);
 		bodyState = BodyState.Running;
 	}
 
 	public virtual void Slide (
 		float horizontalMovementStickInput,
-		float verticalMovementStickInput
+		float verticalMovementStickInput,
+		Vector3 forwardDirection,
+		Vector3 sideDirection
 	) {
 		Move ( 
 			normalSpeed,
 			horizontalMovementStickInput,
-			verticalMovementStickInput
+			verticalMovementStickInput,
+			forwardDirection,
+			sideDirection
 		);
 		bodyState = BodyState.Sliding;
 	}
@@ -200,40 +203,44 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 	}
 
 	public virtual void InteractionButton () {
-		bodyState = BodyState.Interacting;
+		activityState = ActivityState.Interacting;
 	}
 
 	public virtual void MagicButton () {
-		bodyState = BodyState.MagicAttacking;
+		activityState = ActivityState.MagicAttacking;
 	}
 
 	public virtual void TimeSlowButton () {
-		bodyState = BodyState.TimeSlowing;
+		activityState = ActivityState.TimeSlowing;
 	}
 
 	public virtual void TimePauseButton () {
-		bodyState = BodyState.TimePausing;
+		activityState = ActivityState.TimePausing;
 	}
 
 	public virtual void TimeStopButton () {
-		bodyState = BodyState.TimeStopping;
+		activityState = ActivityState.TimeStopping;
 	}
 
 	private void Move (
 		float movementSpeed,
 		float horizontalMovementStickInput,
-		float verticalMovementStickInput
+		float verticalMovementStickInput,
+		Vector3 forwardDirection,
+		Vector3 sideDirection
 	) {
 		
-		if ( rigidBody == null ) {
+		if ( rigidBody == null || slowDownEffect == 0.0f ) {
 			return;
 		}
+			
+		movementSpeed *= slowDownEffect;
 
 		// 1. get forward direction of camera
-		Vector3 cameraForwardDirection = cameraController.getCameraForwardDirection ();
+		Vector3 cameraForwardDirection = forwardDirection;
 
 		// 2. get side direction of camera
-		Vector3 cameraSideDirection = cameraController.getCameraSideDirection ();
+		Vector3 cameraSideDirection = sideDirection;
 
 		// 3. calculate new forward velocity
 		Vector3 newForwardVelocity = cameraForwardDirection * verticalMovementStickInput * movementSpeed;
@@ -244,27 +251,32 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		// 5. calculate new velocity
 		Vector3 newVelocity = newForwardVelocity + newSideVelocity;
 
-		// 6. maintain original y-axis velocity, i.e. gravity or jumping 
-		newVelocity.y = rigidBody.velocity.y;
-
-		// 7. calculate Slerp for new rotation, between the original velocity and the new velocity
-		Quaternion newRotation = Quaternion.Slerp ( 
-			rigidBody.rotation,
-			Quaternion.LookRotation ( 
-				newVelocity.normalized, 
-				Vector3.up 
-			),
-			turnSpeed * Time.deltaTime
+		// 6. calculate Slerp for new rotation, between the original velocity and the new velocity
+		Quaternion desiredRotation = Quaternion.LookRotation (
+			newVelocity,
+			Vector3.up 
 		);
 
-		// 8. maintain original xz-axis rotation
-		newRotation.x = rigidBody.rotation.x;
-		newRotation.z = rigidBody.rotation.z;
+		// 7. check if desired rotation is not the zero vector: no change in rotation if so
+		if ( !desiredRotation.eulerAngles.Equals ( Vector3.zero ) ) {
+			Quaternion newRotation = Quaternion.Slerp ( 
+				rigidBody.rotation,
+				desiredRotation,
+				turnSpeed * Time.deltaTime
+			);
 
-		// 9. apply new rotation to rigidBody 
-		rigidBody.rotation = newRotation;
+			// 8. maintain original xz-axis rotation
+			newRotation.x = rigidBody.rotation.x;
+			newRotation.z = rigidBody.rotation.z;
 
-		// 10. apply new velocity to rigidBody
+			// 9. apply new rotation to rigidBody
+			rigidBody.rotation = newRotation;
+		}
+
+		// 10. maintain original y-axis velocity, i.e. gravity or jumping 
+		newVelocity.y = rigidBody.velocity.y * slowDownEffect;
+
+		// 11. apply new velocity to rigidBody
 		rigidBody.velocity = newVelocity;
 	}
 		
@@ -282,11 +294,27 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		return rigidBody.velocity.y == 0.0f;
 	}
 
-	void OnCollisionEnter ( Collision collision ) {
-		//Debug.Log ( "VirtualBody OnCollisionEnter!" );
+	public Vector3 GetPosition () {
+		return rigidBody.position;
+	}
+
+	public virtual void TimeStatusEffect ( float slowDownEffect ) {
+		this.slowDownEffect = slowDownEffect;
 	}
 
 	void OnTriggerEnter ( Collider collider ) {
-		//Debug.Log ( "VirtualBody OnTriggerEnter!" );
+		IVirtualController virtualController = 
+			collider.GetComponent < IVirtualController > ();
+		if ( virtualController != null ) { 
+			virtualController.TimeStatusEffect ( timeManipulatorController.TimeSlow () );
+		}
+	}
+
+	void OnTriggerExit ( Collider collider ) {
+		IVirtualController virtualController = 
+			collider.GetComponent < IVirtualController > ();
+		if ( virtualController != null ) {
+			virtualController.TimeStatusEffect ( timeManipulatorController.TimeRestore () );
+		}
 	}
 }

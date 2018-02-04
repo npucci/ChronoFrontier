@@ -2,6 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NullInteractionController : MonoBehaviour , IInteractionController {
+public class NullInteractionController : IInteractionController {
 
 }

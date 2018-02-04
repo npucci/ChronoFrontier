@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NullCameraController : MonoBehaviour , ICameraController {
+public class NullCameraController : ICameraController {
 	public virtual void updateCameraPositioning ( 
 		float horizontalViewStickInput,
 		float verticalViewStickInput,
@@ -11,26 +11,24 @@ public class NullCameraController : MonoBehaviour , ICameraController {
 		// do nothing
 	}
 
+	public virtual void MoveCameraToTarget ( Vector3 targetPosition ) {
+		// do nothing
+	}
 
 	public virtual void setCameraMovementSpeed ( float cameraMovementSpeed ) {
 		// do nothing
 	}
-
-	public virtual Vector3 getCameraForwardVector () {
-		return Vector3.zero;
-	}
-
 
 	public virtual Vector3 getCameraDistanceFromTarget () {
 		return Vector3.zero;
 	}
 
 	public Vector3 getCameraForwardDirection () {
-		return Vector3.zero;
+		return Vector3.forward;
 	}
 
 	public Vector3 getCameraSideDirection () {
-		return Vector3.zero;
+		return Vector3.right;
 	}
 
 }

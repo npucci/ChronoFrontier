@@ -20,9 +20,18 @@ public class ThirdPersonCameraController : MonoBehaviour , ICameraController {
 			-5.0f
 		) );
 
-		cameraMovementSpeed = 15.0f;
-
+		cameraMovementSpeed = 8.2f;
 		setColliderAndRigidbody ();
+	}
+
+	public virtual void MoveCameraToTarget ( Vector3 targetPosition ) {
+		Debug.Log ( "targetPosition = " + targetPosition );
+		updateCameraPositioning (
+			100.0f,
+			100.0f,
+			targetPosition
+		);
+
 	}
 
 	public virtual void updateCameraPositioning ( 
@@ -59,11 +68,6 @@ public class ThirdPersonCameraController : MonoBehaviour , ICameraController {
 
 	public virtual void setCameraMovementSpeed ( float cameraMovementSpeed ) {
 		this.cameraMovementSpeed = cameraMovementSpeed;
-	}
-
-	public virtual Vector3 getCameraForwardVector () {
-		Vector3 forwardDirection = transform.forward;
-		return forwardDirection;
 	}
 
 	public virtual Vector3 getCameraDistanceFromTarget () {
