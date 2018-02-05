@@ -111,16 +111,13 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		}
 	}
 
-	void Update () {
-		/*
-		bool noVelocity = rigidBody.velocity.x == 0.0f && 
-			rigidBody.velocity.y == 0.0f && 
-			rigidBody.velocity.z == 0.0f;
-		
-		if ( noVelocity ) {
-			bodyState = BodyState.Idle;
-		}
-		*/
+	void FixedUpdate () {
+		if ( slowDownEffect != 0.0f && slowDownEffect != 1.0f ) {
+			rigidBody.AddForce ( 
+				Physics.gravity * rigidBody.mass * rigidBody.velocity.y * Time.deltaTime,
+				ForceMode.Acceleration
+			);
+		} 
 	}
 
 	public virtual void MovementStickInput (
@@ -211,6 +208,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 			return;
 		}
 			
+		//rigidBody.AddForce ( Physics.gravity * rigidBody.mass * slowDownEffect );
 		movementSpeed *= slowDownEffect;
 
 		// 1. get forward direction of camera
@@ -234,7 +232,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 			Vector3.up 
 		);
 
-		// 7. check if desired rotation is not the zero vector: no change in rotation if so
+		// 7. check if desired rotation is not the zero vector: if so, there is no change in rotation
 		if ( !desiredRotation.eulerAngles.Equals ( Vector3.zero ) ) {
 			Quaternion newRotation = Quaternion.Slerp ( 
 				rigidBody.rotation,
