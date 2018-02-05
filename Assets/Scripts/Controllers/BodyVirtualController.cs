@@ -22,9 +22,11 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 
 	private float normalSpeed = 12.0f;
 
+	private bool sliding = false;
+
+	private bool running = false;
 	private float runSpeedMax = 5.0f;
 	private float runSpeedIncrement = 0.5f;
-
 	private float runSpeedCurrent = 0.0f;
 
 	private float turnSpeed = 15.2f;
@@ -32,7 +34,16 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 
 	private float maxHP = 100.0f;
 	private float currentHP = 100.0f;
+
+	private bool interacting = false;
+
+	private bool attacking = false;
+	private bool magicAttacking = false;
 	private float attackDamage = 15.0f;
+
+	private bool timeSlowing = false;
+	private bool timePausing = false;
+	private bool timeStopping = false;
 	private float slowDownEffect = 1.0f; 
 
 	private BodyState bodyState = BodyState.Idle;
@@ -101,19 +112,15 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 	}
 
 	void Update () {
+		/*
 		bool noVelocity = rigidBody.velocity.x == 0.0f && 
 			rigidBody.velocity.y == 0.0f && 
 			rigidBody.velocity.z == 0.0f;
 		
 		if ( noVelocity ) {
 			bodyState = BodyState.Idle;
-		} 
-
-		//Debug.Log ( "bodyState = " + bodyState );
-	}
-
-	void LateUpdate () {
-		
+		}
+		*/
 	}
 
 	public virtual void MovementStickInput (
@@ -122,7 +129,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		Vector3 forwardDirection,
 		Vector3 sideDirection
 	) {
-		if ( 0.0f < runSpeedCurrent ) {
+		if ( !running && 0.0f < runSpeedCurrent ) {
 			runSpeedCurrent -= runSpeedIncrement;
 
 			if ( runSpeedCurrent < 0.0f ) {
@@ -130,23 +137,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 			}
 		} 
 
-		Move (
-			normalSpeed + runSpeedCurrent,
-			horizontalMovementStickInput,
-			verticalMovementStickInput,
-			forwardDirection,
-			sideDirection
-		);
-		bodyState = BodyState.Moving;
-	}
-
-	public virtual void RunButton (
-		float horizontalMovementStickInput,
-		float verticalMovementStickInput,
-		Vector3 forwardDirection,
-		Vector3 sideDirection
-	) {
-		if ( onGround () && runSpeedCurrent < runSpeedMax ) {
+		else if ( running && runSpeedCurrent < runSpeedMax )  {
 			runSpeedCurrent += runSpeedIncrement;
 
 			if ( runSpeedMax < runSpeedCurrent ) {
@@ -161,31 +152,22 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 			forwardDirection,
 			sideDirection
 		);
-		bodyState = BodyState.Running;
 	}
 
-	public virtual void Slide (
-		float horizontalMovementStickInput,
-		float verticalMovementStickInput,
-		Vector3 forwardDirection,
-		Vector3 sideDirection
-	) {
-		Move ( 
-			normalSpeed,
-			horizontalMovementStickInput,
-			verticalMovementStickInput,
-			forwardDirection,
-			sideDirection
-		);
-		bodyState = BodyState.Sliding;
+	public virtual void RunButton (  bool clicked ) {
+		if ( onGround () ) {
+			running = clicked;
+		} 
 	}
 
-	public virtual void JumpButton () {
-		if ( rigidBody == null ) {
-			return;
-		}
-			
-		if ( !onGround () ) {
+	public virtual void Slide ( bool clicked ) {
+		if ( onGround () ) {
+			sliding = clicked;
+		} 
+	}
+
+	public virtual void JumpButton ( bool clicked ) {
+		if ( rigidBody == null || !onGround () || !clicked ) {
 			return;
 		}
 
@@ -199,27 +181,14 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		);
 
 		rigidBody.velocity = jumpVelocity;
-		bodyState = BodyState.Jumping;
 	}
 
-	public virtual void InteractionButton () {
-		activityState = ActivityState.Interacting;
+	public virtual void InteractionButton ( bool clicked ) {
+		interacting = clicked;
 	}
 
-	public virtual void MagicButton () {
-		activityState = ActivityState.MagicAttacking;
-	}
-
-	public virtual void TimeSlowButton () {
-		activityState = ActivityState.TimeSlowing;
-	}
-
-	public virtual void TimePauseButton () {
-		activityState = ActivityState.TimePausing;
-	}
-
-	public virtual void TimeStopButton () {
-		activityState = ActivityState.TimeStopping;
+	public virtual void MagicButton ( bool clicked ) {
+		magicAttacking = clicked;
 	}
 
 	private void Move (
@@ -230,7 +199,15 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		Vector3 sideDirection
 	) {
 		
-		if ( rigidBody == null || slowDownEffect == 0.0f ) {
+		if ( rigidBody == null ) {
+			return;
+		}
+
+		if ( slowDownEffect == 0.0f ) {
+			return;
+		}
+	
+		if ( horizontalMovementStickInput == 0.0f && verticalMovementStickInput == 0.0f ) {
 			return;
 		}
 			
@@ -300,21 +277,84 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 
 	public virtual void TimeStatusEffect ( float slowDownEffect ) {
 		this.slowDownEffect = slowDownEffect;
+
+		if ( slowDownEffect == 0.0f ) {
+			rigidBody.isKinematic = true;
+		} 
+
+		else {
+			rigidBody.isKinematic = false;
+		}
+	}
+
+	public virtual void TimeSlowButton ( bool clicked ) {
+		timeSlowing = clicked;
+		if ( timeSlowing ) {
+			timeManipulatorController.TimeSlow ();	
+		}
+
+		else if ( !timePausing && !timeStopping ) {
+			timeManipulatorController.TimeRestore ();
+		}
+	}
+
+	public virtual void TimePauseButton ( bool clicked ) {
+		timePausing = clicked;
+		if ( timePausing ) {
+			timeManipulatorController.TimePause ();
+		}
+
+		else if ( !timeSlowing && !timeStopping ) {
+			timeManipulatorController.TimeRestore ();
+		}
+	}
+
+	public virtual void TimeStopButton ( bool clicked ) {
+		timeStopping = clicked;
+		if ( timeSlowing ) {
+			timeManipulatorController.TimeStop ();	
+		}
+
+		else if ( !timePausing && !timeSlowing ) {
+			timeManipulatorController.TimeRestore ();
+		}
 	}
 
 	void OnTriggerEnter ( Collider collider ) {
 		IVirtualController virtualController = 
-			collider.GetComponent < IVirtualController > ();
-		if ( virtualController != null ) { 
-			virtualController.TimeStatusEffect ( timeManipulatorController.TimeSlow () );
+			collider.GetComponent < BodyVirtualController > ();
+		
+		if ( virtualController == null ) { 
+			return;
 		}
+
+		if ( !timeSlowing && !timePausing && !timeStopping ) {
+			return;
+		}
+			
+		timeManipulatorController.AddTimeManipulatableObject ( virtualController );
+	}
+
+	void OnTriggerStay ( Collider collider ) {
+		IVirtualController virtualController = 
+			collider.GetComponent < BodyVirtualController > ();
+
+		if ( virtualController == null ) { 
+			return;
+		}
+
+		if ( !timeSlowing && !timePausing && !timeStopping ) {
+			return;
+		}
+
+		timeManipulatorController.AddTimeManipulatableObject ( virtualController );
 	}
 
 	void OnTriggerExit ( Collider collider ) {
 		IVirtualController virtualController = 
 			collider.GetComponent < IVirtualController > ();
 		if ( virtualController != null ) {
-			virtualController.TimeStatusEffect ( timeManipulatorController.TimeRestore () );
+			timeManipulatorController.RemoveTimeManipulatableObject ( virtualController );
 		}
 	}
 }

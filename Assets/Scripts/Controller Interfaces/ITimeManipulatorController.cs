@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public interface ITimeManipulatorController {
-	float TimeSlow ();
-	float TimePause ();
-	float TimeRestore ();
+	void TimeSlow ();
+	void TimePause ();
+	void TimeStop ();
+	void TimeRestore ();
+	void AddTimeManipulatableObject ( IVirtualController virtualController );
+	void RemoveTimeManipulatableObject ( IVirtualController virtualController );
 }

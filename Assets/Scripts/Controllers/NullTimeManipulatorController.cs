@@ -3,17 +3,27 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class NullTimeManipulatorController : ITimeManipulatorController {
-	private float negligibleTimeFactor = 1.0f;
-
-	public virtual float TimeSlow () {
-		return negligibleTimeFactor;
+	public virtual void TimeSlow () {
+		// do nothing
 	}
 
-	public virtual float TimePause () {
-		return negligibleTimeFactor;
+	public virtual void TimePause () {
+		// do nothing
 	}
 
-	public virtual float TimeRestore () {
-		return negligibleTimeFactor;
+	public virtual void TimeStop () {
+		// do nothing
+	}
+
+	public virtual void TimeRestore () {
+		// do nothing
+	}
+
+	public virtual void AddTimeManipulatableObject ( IVirtualController virtualController ) {
+		// do nothing
+	}
+
+	public virtual void RemoveTimeManipulatableObject ( IVirtualController virtualController ) {
+		// do nothing
 	}
 }

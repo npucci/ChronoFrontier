@@ -10,31 +10,21 @@ public interface IVirtualController {
 		Vector3 sideDirection
 	);
 
-	void RunButton (
-		float xMovementStickInput,
-		float yMovementStickInput,
-		Vector3 forwardDirection,
-		Vector3 sideDirection
-	);
+	void RunButton ( bool clicked );
 
-	void Slide (
-		float xMovementStickInput,
-		float yMovementStickInput,
-		Vector3 forwardDirection,
-		Vector3 sideDirection
-	);
+	void Slide ( bool clicked );
 
-	void JumpButton ();
+	void JumpButton ( bool clicked );
 
-	void InteractionButton ();
+	void InteractionButton ( bool clicked );
 
-	void MagicButton ();
+	void MagicButton ( bool clicked );
 
-	void TimeSlowButton ();
+	void TimeSlowButton ( bool clicked );
 
-	void TimePauseButton ();
+	void TimePauseButton ( bool clicked );
 
-	void TimeStopButton ();
+	void TimeStopButton ( bool clicked );
 
 	void TimeStatusEffect ( float slowDownEffect );
 

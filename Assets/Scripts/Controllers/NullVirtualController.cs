@@ -17,45 +17,35 @@ public class NullVirtualController : IVirtualController {
 		// do nothing
 	}
 
-	public virtual void RunButton (
-		float xMovementStickInput,
-		float yMovementStickInput,
-		Vector3 forwardDirection,
-		Vector3 sideDirection
-	) {
+	public virtual void RunButton ( bool clicked ) {
 		// do nothing
 	}
 
-	public virtual void Slide (
-		float xMovementStickInput,
-		float yMovementStickInput,
-		Vector3 forwardDirection,
-		Vector3 sideDirection
-	) {
+	public virtual void Slide ( bool clicked ) {
 		// do nothing
 	}
 
-	public virtual void JumpButton () {
+	public virtual void JumpButton ( bool clicked ) {
 		// do nothing
 	}
 
-	public virtual void InteractionButton () {
+	public virtual void InteractionButton ( bool clicked ) {
 		// do nothing
 	}
 
-	public virtual void MagicButton () {
+	public virtual void MagicButton ( bool clicked ) {
 		// do nothing
 	}
 
-	public virtual void TimeSlowButton () {
+	public virtual void TimeSlowButton ( bool clicked ) {
 		// do nothing
 	}
 
-	public virtual void TimePauseButton () {
+	public virtual void TimePauseButton ( bool clicked ) {
 		// do nothing
 	}
 
-	public virtual void TimeStopButton () {
+	public virtual void TimeStopButton ( bool clicked ) {
 		// do nothing
 	}
 

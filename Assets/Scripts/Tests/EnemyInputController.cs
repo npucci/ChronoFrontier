@@ -27,7 +27,8 @@ public class EnemyInputController : MonoBehaviour , IInputController {
 		cameraController = new NullCameraController ();
 	}
 
-	void Update () {
+	// rigidbody and physics calculations 
+	void FixedUpdate () {
 		float distFromOriginX = Mathf.Abs ( travelOriginPoint.x - transform.position.x );
 		//float distFromOriginY = Mathf.Abs ( travelOriginPoint.y - transform.position.y );
 		//float distFromOriginZ = Mathf.Abs ( travelOriginPoint.z - transform.position.z );
@@ -36,12 +37,15 @@ public class EnemyInputController : MonoBehaviour , IInputController {
 			reverseDirection ();
 		} 
 
-		virtualController.MovementStickInput (
-			xMovementStickInput,
-			yMovementStickInput,
-			cameraController.getCameraForwardDirection (),
-			cameraController.getCameraSideDirection ()
-		);
+		bool newMovementInput = xMovementStickInput != 0.0f || yMovementStickInput != 0.0f;
+		if ( newMovementInput ) {
+			virtualController.MovementStickInput (
+				xMovementStickInput,
+				yMovementStickInput,
+				cameraController.getCameraForwardDirection (),
+				cameraController.getCameraSideDirection ()
+			);
+		}
 	}
 
 	public virtual void SetCameraController ( ICameraController cameraController ) {

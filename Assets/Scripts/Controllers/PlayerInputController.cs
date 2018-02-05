@@ -11,6 +11,8 @@ public class PlayerInputController : MonoBehaviour , IInputController {
 
 	private const string INPUT_JUMP_BUTTON = "Jump";
 	private const string INPUT_RUN_BUTTON = "Run";
+	private const string INPUT_TIME_SLOWING_BUTTON = "Time Slowing";
+	private const string INPUT_TIME_PAUSING_BUTTON = "Time Pausing";
 
 	float horizontalMovementStickInput = 0.0f;
 	float verticalMovementStickInput = 0.0f;
@@ -41,25 +43,21 @@ public class PlayerInputController : MonoBehaviour , IInputController {
 
 	// rigidbody and physics calculations 
 	void FixedUpdate () {
+		if ( Input.GetButtonDown ( INPUT_JUMP_BUTTON ) ) {
+			virtualController.JumpButton ( true );
+		}
+
+		virtualController.RunButton ( Input.GetButton ( INPUT_RUN_BUTTON ) );
+
 		bool newMovementInput = horizontalMovementStickInput != 0.0f || verticalMovementStickInput != 0.0f;
 		if ( newMovementInput ) {
-			if ( Input.GetButton ( INPUT_RUN_BUTTON ) ) {
-				virtualController.RunButton (
-					horizontalMovementStickInput,
-					verticalMovementStickInput,
-					cameraController.getCameraForwardDirection (),
-					cameraController.getCameraSideDirection ()
-				);
-			} 
+			virtualController.MovementStickInput (
+				horizontalMovementStickInput,
+				verticalMovementStickInput,
+				cameraController.getCameraForwardDirection (),
+				cameraController.getCameraSideDirection ()
+			);
 
-			else {
-				virtualController.MovementStickInput (
-					horizontalMovementStickInput,
-					verticalMovementStickInput,
-					cameraController.getCameraForwardDirection (),
-					cameraController.getCameraSideDirection ()
-				);
-			}
 		}
 
 		bool newViewStickInput = horizontalViewStickInput != 0.0f || verticalViewStickInput != 0.0f;
@@ -70,11 +68,9 @@ public class PlayerInputController : MonoBehaviour , IInputController {
 				GetPosition ()
 			);
 		}
-
-		if ( Input.GetButtonDown ( INPUT_JUMP_BUTTON ) ) {
-			virtualController.JumpButton ();
-		}
 			
+		virtualController.TimeSlowButton ( Input.GetButton ( INPUT_TIME_SLOWING_BUTTON ) );
+		virtualController.TimePauseButton ( Input.GetButton ( INPUT_TIME_PAUSING_BUTTON ) );	
 	}
 
 	private void setVirtualController () {

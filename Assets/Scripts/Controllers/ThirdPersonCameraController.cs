@@ -46,11 +46,11 @@ public class ThirdPersonCameraController : MonoBehaviour , ICameraController {
 		);
 
 		float currentXAngle = transform.rotation.eulerAngles.x;
-		bool angleTooLow = 320.0f < currentXAngle && 
-			currentXAngle < 360.0f && 
-			verticalViewStickInput < 0.0f;
+		bool angleTooLow = currentXAngle < 10.0f ||
+		                   ( 320.0f < currentXAngle &&
+		                   currentXAngle < 360.0f );
 
-		if ( angleTooLow ) {
+		if ( verticalViewStickInput < 0.0f && angleTooLow ) {
 			desiredRotation.x = currentXAngle;
 		}
 
@@ -110,6 +110,7 @@ public class ThirdPersonCameraController : MonoBehaviour , ICameraController {
 		if ( cameraCollider == null ) {
 			cameraCollider = gameObject.AddComponent ( typeof ( SphereCollider ) ) as SphereCollider;
 		}
+		cameraCollider.radius *= 1.5f;
 		cameraCollider.isTrigger = true;
 
 		Rigidbody cameraRigidBody = GetComponent < Rigidbody > ();
@@ -120,11 +121,11 @@ public class ThirdPersonCameraController : MonoBehaviour , ICameraController {
 	}
 
 	void OnCollisionEnter ( Collision collision ) {
-		Debug.Log ( "OnCollisionEnter!" );
+		//Debug.Log ( "OnCollisionEnter!" );
 	}
 
 	void OnTriggerEnter ( Collider collider ) {
-		Debug.Log ( "OnTriggerEnter!" );
+		//Debug.Log ( "OnTriggerEnter!" );
 	}
 
 }
