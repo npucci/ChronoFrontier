@@ -28,8 +28,8 @@ public class DynamicCameraController : MonoBehaviour , ICameraController {
 	);
 	private Vector3 xySsideScrollingCameraDistanceFromTarget = new Vector3 (
 		0.0f,
-		0.0f,
-		-5.0f
+		2.0f,
+		-8.0f
 	);
 
 	private Vector3 zySideScrollingCameraAngleFromTarget = new Vector3 (
@@ -39,8 +39,8 @@ public class DynamicCameraController : MonoBehaviour , ICameraController {
 	);
 	private Vector3 zySideScrollingCameraDistanceFromTarget = new Vector3 (
 		0.0f,
-		0.0f,
-		-5.0f
+		2.0f,
+		-8.0f
 	);
 
 	private Vector3 thirdPersoncameraDistanceFromTarget;

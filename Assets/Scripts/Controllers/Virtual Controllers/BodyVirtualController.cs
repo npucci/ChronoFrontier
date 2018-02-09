@@ -322,11 +322,12 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 
 		if ( slowDownEffect == 0.0f ) {
 			rigidBody.isKinematic = true;
+			rigidBody.useGravity = false;
 		} 
 
 		else {
 			rigidBody.isKinematic = false;
-			rigidBody.useGravity = false;
+			rigidBody.useGravity = true;
 		}
 	}
 
@@ -371,31 +372,55 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		BodyVirtualController virtualController = 
 			collider.GetComponent < BodyVirtualController > ();
 		
-		if ( virtualController == null ) { 
+		if ( collider.isTrigger || virtualController == null ) { 
 			return;
+		}
+
+		IHealthController enemyHealthController = collider.GetComponent < CombatHealthController > ();
+		float distanceX = Mathf.Abs ( rigidBody.position.x - collider.transform.position.x );
+		float distanceZ = Mathf.Abs ( rigidBody.position.z - collider.transform.position.z );
+		float distanceY = Mathf.Abs ( rigidBody.position.y - collider.transform.position.y );
+
+		float xzDistanceMax = 0.1f;
+		float yDistanceMax = 0.1f;
+		bool validDistance = distanceX < xzDistanceMax && 
+			distanceZ < xzDistanceMax && 
+			distanceY < yDistanceMax;    
+
+		if ( enemyHealthController != null && !attackWindowTimer.stopped () ) {
+			enemyHealthController.DecreaseHP ( combatController.Attack () );
+			attackWindowTimer.stopTimer ();
 		}
 
 		if ( !timeSlowing && !timePausing && !timeStopping ) {
 			return;
 		}
-			
+
 		timeManipulatorController.AddTimeManipulatableObject ( virtualController );
 	}
 
 	void OnTriggerStay ( Collider collider ) {
 		BodyVirtualController virtualController = 
 			collider.GetComponent < BodyVirtualController > ();
-
-		if ( virtualController == null ) { 
+		
+		if ( collider.isTrigger || virtualController == null ) { 
 			return;
 		}
 
 		IHealthController enemyHealthController = collider.GetComponent < CombatHealthController > ();
+		float distanceX = Mathf.Abs ( rigidBody.position.x - collider.transform.position.x );
+		float distanceZ = Mathf.Abs ( rigidBody.position.z - collider.transform.position.z );
+		float distanceY = Mathf.Abs ( rigidBody.position.y - collider.transform.position.y );
+
+		float xzDistanceMax = 0.1f;
+		float yDistanceMax = 0.1f;
+		bool validDistance = distanceX < xzDistanceMax && 
+			distanceZ < xzDistanceMax && 
+			distanceY < yDistanceMax;    
+
 		if ( enemyHealthController != null && !attackWindowTimer.stopped () ) {
-			Debug.Log ( "Player Attacked!" );
-			Debug.Log ( "Before: " + enemyHealthController.GetCurrentHP () );
 			enemyHealthController.DecreaseHP ( combatController.Attack () );
-			Debug.Log ( "After: " + enemyHealthController.GetCurrentHP () );
+			attackWindowTimer.stopTimer ();
 		}
 
 		if ( !timeSlowing && !timePausing && !timeStopping ) {

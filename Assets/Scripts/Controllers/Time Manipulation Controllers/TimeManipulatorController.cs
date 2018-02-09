@@ -10,7 +10,7 @@ public class TimeManipulatorController : MonoBehaviour , ITimeManipulatorControl
 
 	private float currentTimeStatusEffect = 1.0f;
 
-	private float maxTimeFieldSphereScale = 10.0f;
+	private float maxTimeFieldSphereScale = 7.0f;
 
 	private GameObject timeFieldSphere;
 	private SphereCollider timeField;

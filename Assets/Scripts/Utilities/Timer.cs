@@ -21,7 +21,7 @@ public class Timer {
 		if ( !stop && countDown > 0f ) {
 			countDown -= deltaTime;
 			if ( countDown < 0f ) {
-				stop = true;
+				stopTimer ();
 			}
 		}
 	}
@@ -37,6 +37,11 @@ public class Timer {
 		
 	public bool stopped () {
 		return stop;
+	}
+
+	public void stopTimer () {
+		countDown = 0f;
+		stop = true;
 	}
 		
 	public void setTimer ( float timerAmount ) {

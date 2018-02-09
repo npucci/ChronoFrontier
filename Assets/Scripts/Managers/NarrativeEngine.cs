@@ -88,7 +88,11 @@ public class NarrativeEngine : MonoBehaviour , ICameraModeTriggerListener {
 	}
 
 	private void SpawnBox () {
-		specialBox.transform.position = ( Vector3.up * 10.0f );
+		specialBox.transform.position = new Vector3 (
+			0f,
+			10f,
+			21f
+		);
 	}
 
 	public virtual void OnCameraModeTrigger ( 
