@@ -6,7 +6,7 @@ public class CombatController : MonoBehaviour , ICombatController {
 	private float attackDamage;
 		
 	void Start () {
-		attackDamage = 20.0f;
+		attackDamage = 40.0f;
 	}
 
 	public virtual float Attack () {

@@ -13,8 +13,8 @@ public class NarrativeEngine : MonoBehaviour , ICameraModeTriggerListener {
 	private Timer playerInputDisableTimer = null;
 	private float playerInputDisableTimerWaitSec = 0.2f;
 
-
 	void Start () {
+
 		Camera camera = Camera.main;
 		if ( camera == null ) {
 			GameObject cameraGameObject = Instantiate ( new GameObject () );
