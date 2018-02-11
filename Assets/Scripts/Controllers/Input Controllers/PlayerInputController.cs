@@ -79,9 +79,9 @@ public class PlayerInputController : MonoBehaviour , IInputController {
 			virtualController.AttackButton ( true );
 		}
 
-		if ( Input.GetButton ( INPUT_RUN_BUTTON ) ) {
-			virtualController.RunButton ( Input.GetButton ( INPUT_RUN_BUTTON ) );
-		}
+		//if ( Input.GetButton ( INPUT_RUN_BUTTON ) ) {
+		//	virtualController.RunButton ( Input.GetButton ( INPUT_RUN_BUTTON ) );
+		//}
 
 		bool newMovementInput = horizontalMovementStickInput != 0.0f || verticalMovementStickInput != 0.0f;
 		if ( newMovementInput ) {
