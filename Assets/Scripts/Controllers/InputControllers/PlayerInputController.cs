@@ -89,6 +89,7 @@ public class PlayerInputController : MonoBehaviour , IInputController {
 			virtualController.MovementStickInput (
 				horizontalMovementStickInput,
 				verticalMovementStickInput,
+				cameraController.GetCameraUpDirection (),
 				cameraController.GetCameraForwardDirection (),
 				cameraController.GetCameraSideDirection ()
 			);

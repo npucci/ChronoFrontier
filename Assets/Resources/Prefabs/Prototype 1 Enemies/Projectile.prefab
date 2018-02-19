@@ -23,9 +23,9 @@ GameObject:
   - component: {fileID: 136850233186485158}
   - component: {fileID: 23132724765605436}
   - component: {fileID: 114115389723646756}
-  - component: {fileID: 114952308887866996}
   - component: {fileID: 54734311122659834}
-  - component: {fileID: 114077801016462756}
+  - component: {fileID: 114500412588576062}
+  - component: {fileID: 114182837690419564}
   m_Layer: 0
   m_Name: Projectile
   m_TagString: Untagged
@@ -99,17 +99,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &114077801016462756
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1276986703270840}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d7716364ba279e744bd9e6cafbc33900, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &114115389723646756
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -121,7 +110,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f76524a2d51604347a1ee8a20d3b6a12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &114952308887866996
+--- !u!114 &114182837690419564
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -129,7 +118,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 1276986703270840}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 86296492c00bd0848bf1a32cc605cbc7, type: 3}
+  m_Script: {fileID: 11500000, guid: 2564f0d4616fc34428b9775b1d7cb711, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114500412588576062
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1276986703270840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a73250f1e82fd745a6bad010501350c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!136 &136850233186485158

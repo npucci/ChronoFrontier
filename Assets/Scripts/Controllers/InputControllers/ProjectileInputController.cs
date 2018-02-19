@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ProjectileInputController : MonoBehaviour , IInputController {
-	private ICombatController combatController;
+	private IAttackController attackController;
 	private float lifeTimeSec = 2f;
 	private Timer lifeTimer;
 	private float attackDamage = 20.0f;
@@ -18,11 +18,10 @@ public class ProjectileInputController : MonoBehaviour , IInputController {
 
 	// Use this for initialization
 	void Start () {
-		combatController = GetComponent < ICombatController > ();
-		if ( combatController == null ) {
-			combatController = new NullCombatController ();
+		attackController = GetComponent < IAttackController > ();
+		if ( attackController == null ) {
+			attackController = new NullAttackController ();
 		}
-		combatController.SetAttackDamage ( attackDamage );
 
 		virtualController = GetComponent < IVirtualController > ();
 		if ( virtualController == null ) {
@@ -47,6 +46,7 @@ public class ProjectileInputController : MonoBehaviour , IInputController {
 		virtualController.MovementStickInput (
 			0f,
 			-1f,
+			transform.forward,
 			transform.up,
 			transform.right
 		);
@@ -99,9 +99,9 @@ public class ProjectileInputController : MonoBehaviour , IInputController {
 			return;
 		}
 
-		IHealthController healthController = collision.gameObject.GetComponent < CombatHealthController > ();
+		IHealthController healthController = collision.gameObject.GetComponent < IHealthController > ();
 		if ( healthController != null ) {
-			healthController.DecreaseHP ( combatController.Attack () );
+			attackController.LightAttack ( healthController );
 		} 
 
 		if ( virtualController.CurrentTimeEffect () != 0f ) {

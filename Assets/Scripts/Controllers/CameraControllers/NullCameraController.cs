@@ -24,6 +24,10 @@ public class NullCameraController : ICameraController {
 		return Vector3.zero;
 	}
 
+	public virtual Vector3 GetCameraUpDirection () {
+		return Vector3.up;
+	}
+
 	public virtual Vector3 GetCameraForwardDirection () {
 		return Vector3.forward;
 	}

@@ -6,37 +6,37 @@ using UnityEngine;
  * Purpose:
  * Generic Finite-State Machine for game characters, 
  * that can be used for the player and NPC/AI
- * Use: Attach to desired mesh (with rigidbody)
+ * Use: Attach to desired mesh
 */
 
-public class BodyVirtualController : MonoBehaviour , IVirtualController {
+public abstract class BodyVirtualController : MonoBehaviour , IVirtualController {
 	private IHealthController healthController;
-	private ICombatController combatController;
+	private IAttackController attackController;
 	private IInteractionController interactionController;
 	private ITimeManipulatorController timeManipulatorController;
 
 	private Rigidbody rigidBody;
-	private float bodyMass = 54.0f;
-	private float drag = 0.5f;
-	private float angularDrag = 0.5f;
+	private float bodyMass;
+	private float drag;
+	private float angularDrag;
 
-	private float normalSpeed = 12.0f;
+	private float normalSpeed;
 
 	private bool sliding = false;
 
 	private bool running = false;
-	private float runSpeedMax = 5.0f;
-	private float runSpeedIncrement = 0.5f;
-	private float runSpeedCurrent = 0.0f;
+	private float runSpeedMax;
+	private float runSpeedIncrement;
+	private float currentRunSpeed = 0f;
 
-	private float turnSpeed = 15.2f;
-	private float jumpSpeed = 10.0f;
+	private float turnSpeed;
+	private float jumpSpeed;
 
-	private float maxHP = 100.0f;
-	private float currentHP = 100.0f;
+	private float maxHP;
+	private float currentHP;
 
-	private float attackWaitSec = 0.2f;
-	private float attackWindowSec = 0.1f;
+	private float attackWaitSec;
+	private float attackWindowSec;
 	private Timer attackWaitTimer;
 	private Timer attackWindowTimer;
 
@@ -44,44 +44,27 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 
 	private bool attacking = false;
 	private bool magicAttacking = false;
-	private float attackDamage = 15.0f;
+	private float attackDamage;
 
 	private bool timeSlowing = false;
 	private bool timePausing = false;
 	private bool timeStopping = false;
-	private float slowDownEffect = 1.0f; 
-
-	private BodyState bodyState = BodyState.Idle;
-	private ActivityState activityState = ActivityState.Idle;
-
-	// vertical state: grounded, falling, rising
-	// movement state: running, walking, jumping, sliding, none
-	// activity state: sleeping, interacting, attacking, moving, idle
-	// combat state: sword attacking, magic attacking, time slowing, time pausing, time stopping
-	// time state: time slowed, time paused, time stopped
-
-	private enum BodyState {
-		Idle,
-		Walking,
-		Running,
-		Moving,
-		Jumping,
-		Sliding,
-		Sleeping
-	}
-
-	private enum ActivityState {
-		Idle,
-		SwordAttacking,
-		MagicAttacking,
-		Interacting,
-		TimeSlowing,
-		TimePausing,
-		TimeStopping
-	}
-
+	private float currentSlowDownEffect = 1f; 
 
 	void Start () {
+		bodyMass = GetBodyMass ();
+		drag = GetDrag ();
+		angularDrag = GetAngularDrag ();
+		normalSpeed = GetNormalSpeed ();
+		runSpeedMax = GetRunSpeedMax ();
+		runSpeedIncrement = GetRunSpeedIncrement ();
+		turnSpeed = GetTurnSpeed ();
+		jumpSpeed = GetJumpSpeed ();
+		maxHP = GetMaxHP ();
+		attackWaitSec = GetAttackWaitSec ();
+		attackWindowSec = GetAttackWindowSec ();
+		attackDamage = GetAttackDamage ();
+
 		rigidBody = GetComponent < Rigidbody > ();
 		if ( rigidBody == null ) {
 			rigidBody = gameObject.AddComponent < Rigidbody > ();
@@ -96,14 +79,11 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		if ( healthController == null ) {
 			healthController = new NullHealthController ();
 		}
-		healthController.SetCurrentHP ( currentHP );
-		healthController.SetMaxHP ( maxHP );
 
-		combatController = GetComponent < ICombatController > ();
-		if ( combatController == null ) {
-			combatController = new NullCombatController ();
+		attackController = GetComponent < IAttackController > ();
+		if ( attackController == null ) {
+			attackController = new NullAttackController ();
 		}
-		combatController.SetAttackDamage (attackDamage);
 
 		interactionController = GetComponent < IInteractionController > ();
 		if ( interactionController == null ) {
@@ -125,7 +105,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 	}
 
 	void FixedUpdate () {
-		if ( slowDownEffect != 0.0f && slowDownEffect != 1.0f ) {
+		if ( currentSlowDownEffect != 0.0f && currentSlowDownEffect != 1.0f ) {
 			rigidBody.AddForce ( 
 				Physics.gravity * rigidBody.mass * rigidBody.velocity.y * Time.deltaTime,
 				ForceMode.Acceleration
@@ -156,29 +136,31 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 	public virtual void MovementStickInput (
 		float horizontalMovementStickInput,
 		float verticalMovementStickInput,
+		Vector3 upDirection,
 		Vector3 forwardDirection,
 		Vector3 sideDirection
 	) {
-		if ( !running && 0.0f < runSpeedCurrent ) {
-			runSpeedCurrent -= runSpeedIncrement;
+		if ( !running && 0.0f < currentRunSpeed ) {
+			currentRunSpeed -= runSpeedIncrement;
 
-			if ( runSpeedCurrent < 0.0f ) {
-				runSpeedCurrent = 0.0f;
+			if ( currentRunSpeed < 0.0f ) {
+				currentRunSpeed = 0.0f;
 			}
 		} 
 
-		else if ( running && runSpeedCurrent < runSpeedMax )  {
-			runSpeedCurrent += runSpeedIncrement;
+		else if ( running && currentRunSpeed < runSpeedMax )  {
+			currentRunSpeed += runSpeedIncrement;
 
-			if ( runSpeedMax < runSpeedCurrent ) {
-				runSpeedCurrent = runSpeedMax;
+			if ( runSpeedMax < currentRunSpeed ) {
+				currentRunSpeed = runSpeedMax;
 			}
 		}
 
 		Move (
-			normalSpeed + runSpeedCurrent,
+			normalSpeed + currentRunSpeed,
 			horizontalMovementStickInput,
 			verticalMovementStickInput,
+			upDirection,
 			forwardDirection,
 			sideDirection
 		);
@@ -232,6 +214,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		float movementSpeed,
 		float horizontalMovementStickInput,
 		float verticalMovementStickInput,
+		Vector3 upDirection,
 		Vector3 forwardDirection,
 		Vector3 sideDirection
 	) {
@@ -240,7 +223,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 			return;
 		}
 
-		if ( slowDownEffect == 0.0f ) {
+		if ( currentSlowDownEffect == 0.0f ) {
 			return;
 		}
 	
@@ -249,7 +232,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		}
 			
 		//rigidBody.AddForce ( Physics.gravity * rigidBody.mass * slowDownEffect );
-		movementSpeed *= slowDownEffect;
+		movementSpeed *= currentSlowDownEffect;
 
 		// 1. get forward direction of camera
 		Vector3 cameraForwardDirection = forwardDirection;
@@ -269,7 +252,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		// 6. calculate Slerp for new rotation, between the original velocity and the new velocity
 		Quaternion desiredRotation = Quaternion.LookRotation (
 			newVelocity,
-			Vector3.up 
+			upDirection
 		);
 
 		// 7. check if desired rotation is not the zero vector: if so, there is no change in rotation
@@ -278,7 +261,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		}
 
 		// 10. maintain original y-axis velocity, i.e. gravity or jumping 
-		newVelocity.y = rigidBody.velocity.y * slowDownEffect;
+		newVelocity.y = rigidBody.velocity.y * currentSlowDownEffect;
 
 		// 11. apply new velocity to rigidBody
 		rigidBody.velocity = newVelocity;
@@ -288,7 +271,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 		Quaternion newRotation = Quaternion.Slerp ( 
 			rigidBody.rotation,
 			desiredRotation,
-			turnSpeed * Time.deltaTime * slowDownEffect
+			turnSpeed * Time.deltaTime * currentSlowDownEffect
 		);
 
 		// 8. maintain original xz-axis rotation
@@ -318,7 +301,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 	}
 
 	public virtual void TimeStatusEffect ( float slowDownEffect ) {
-		this.slowDownEffect = slowDownEffect;
+		this.currentSlowDownEffect = slowDownEffect;
 
 		if ( slowDownEffect == 0.0f ) {
 			rigidBody.isKinematic = true;
@@ -332,7 +315,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 	}
 
 	public virtual float CurrentTimeEffect () {
-		return slowDownEffect;
+		return currentSlowDownEffect;
 	}
 
 	public virtual void TimeSlowButton ( bool clicked ) {
@@ -376,7 +359,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 			return;
 		}
 
-		IHealthController enemyHealthController = collider.GetComponent < CombatHealthController > ();
+		IHealthController enemyHealthController = collider.GetComponent < IHealthController > ();
 		float distanceX = Mathf.Abs ( rigidBody.position.x - collider.transform.position.x );
 		float distanceZ = Mathf.Abs ( rigidBody.position.z - collider.transform.position.z );
 		float distanceY = Mathf.Abs ( rigidBody.position.y - collider.transform.position.y );
@@ -387,9 +370,8 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 			distanceZ < xzDistanceMax && 
 			distanceY < yDistanceMax;    
 
-		if ( enemyHealthController != null && !attackWindowTimer.stopped () ) {
-			enemyHealthController.DecreaseHP ( combatController.Attack () );
-			attackWindowTimer.stopTimer ();
+		if ( enemyHealthController != null && !attackController.IsAttacking () ) {
+			attackController.LightAttack ( enemyHealthController );
 		}
 
 		if ( !timeSlowing && !timePausing && !timeStopping ) {
@@ -407,7 +389,7 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 			return;
 		}
 
-		IHealthController enemyHealthController = collider.GetComponent < CombatHealthController > ();
+		IHealthController enemyHealthController = collider.GetComponent < IHealthController > ();
 		float distanceX = Mathf.Abs ( rigidBody.position.x - collider.transform.position.x );
 		float distanceZ = Mathf.Abs ( rigidBody.position.z - collider.transform.position.z );
 		float distanceY = Mathf.Abs ( rigidBody.position.y - collider.transform.position.y );
@@ -418,16 +400,13 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 			distanceZ < xzDistanceMax && 
 			distanceY < yDistanceMax;    
 
-		if ( enemyHealthController != null && !attackWindowTimer.stopped () ) {
-			enemyHealthController.DecreaseHP ( combatController.Attack () );
-			attackWindowTimer.stopTimer ();
+		if ( enemyHealthController != null && !attackController.IsAttacking () ) {
+			attackController.LightAttack ( enemyHealthController );
 		}
 
-		if ( !timeSlowing && !timePausing && !timeStopping ) {
-			return;
+		if ( timeSlowing || timePausing || timeStopping ) {
+			timeManipulatorController.AddTimeManipulatableObject ( virtualController );
 		}
-
-		timeManipulatorController.AddTimeManipulatableObject ( virtualController );
 	}
 
 	void OnTriggerExit ( Collider collider ) {
@@ -436,4 +415,29 @@ public class BodyVirtualController : MonoBehaviour , IVirtualController {
 			timeManipulatorController.RemoveTimeManipulatableObject ( virtualController );
 		}
 	}
+
+
+	protected abstract float GetBodyMass ();
+
+	protected abstract float GetDrag ();
+
+	protected abstract float GetAngularDrag ();
+
+	protected abstract float GetNormalSpeed ();
+
+	protected abstract float GetRunSpeedMax ();
+
+	protected abstract float GetRunSpeedIncrement ();
+
+	protected abstract float GetTurnSpeed ();
+
+	protected abstract float GetJumpSpeed ();
+
+	protected abstract float GetMaxHP ();
+
+	protected abstract float GetAttackWaitSec ();
+
+	protected abstract float GetAttackWindowSec ();
+
+	protected abstract float GetAttackDamage ();
 }

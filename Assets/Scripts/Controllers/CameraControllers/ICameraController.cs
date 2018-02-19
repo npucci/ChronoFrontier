@@ -16,6 +16,8 @@ public interface ICameraController {
 
 	Vector3 GetCameraDistanceFromTarget ();
 
+	Vector3 GetCameraUpDirection ();
+
 	Vector3 GetCameraForwardDirection ();
 
 	Vector3 GetCameraSideDirection ();

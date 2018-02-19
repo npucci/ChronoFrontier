@@ -80,7 +80,7 @@ public class NarrativeEngine : MonoBehaviour , ICameraModeTriggerListener {
 
 	private void SpawnPlayer () {
 		playerInputController.SetPosition ( Vector3.up * 10.0f );
-		playerHealthController.MaxHP ();
+		playerHealthController.SetToMaxHP ();
 		playerInputController.SetCameraMode ( 
 			CameraMode.THIRD_PERSON,
 			Vector3.zero

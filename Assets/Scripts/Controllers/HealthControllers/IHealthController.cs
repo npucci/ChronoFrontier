@@ -5,9 +5,8 @@ using UnityEngine;
 public interface IHealthController {
 	void IncreaseHP ( float health );
 	void DecreaseHP ( float damage );
-	void SetMaxHP ( float maxHealthPoints );
 	void SetCurrentHP ( float healthPoints );
-	void MaxHP ();
+	void SetToMaxHP ();
 	float GetMaxHP ();
 	float GetCurrentHP ();
 }

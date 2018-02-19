@@ -6,6 +6,7 @@ public interface IVirtualController {
 	void MovementStickInput (
 		float xMovementStickInput,
 		float yMovementStickInput,
+		Vector3 upDirection,
 		Vector3 forwardDirection,
 		Vector3 sideDirection
 	);

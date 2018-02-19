@@ -19,7 +19,7 @@ public class NullHealthController : IHealthController {
 		// do nothing
 	}
 
-	public virtual void MaxHP () {
+	public virtual void SetToMaxHP () {
 		// do nothing
 	}
 

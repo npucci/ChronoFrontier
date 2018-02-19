@@ -8,13 +8,12 @@ using UnityEngine;
  * that can be used for the player and NPC/AI
 */
 
-public class CombatHealthController : MonoBehaviour , IHealthController {
-	private float emptyHP;
+public abstract class HealthController : MonoBehaviour , IHealthController {
+	private float emptyHP = 0f;
 	private float currentHP;
 	private float maxHP;
 
-	void Start () {
-		emptyHP = 0.0f;
+	protected void Start () {
 		currentHP = 100.0f;
 		maxHP = 100.0f;
 	}
@@ -35,25 +34,17 @@ public class CombatHealthController : MonoBehaviour , IHealthController {
 		}
 	}
 
-	public virtual void SetMaxHP ( float maxHealthPoints ) {
-		if ( validHPValue ( maxHealthPoints ) ) {
-			maxHP = maxHealthPoints;
-		}
-	}
-
 	public virtual void SetCurrentHP ( float healthPoints ) {
 		if ( validHPValue ( healthPoints ) ) {
 			currentHP = healthPoints;
 		}
 	}
 
-	public virtual void MaxHP () {
+	public virtual void SetToMaxHP () {
 		currentHP = maxHP;
 	}
 
-	public virtual float GetMaxHP () {
-		return maxHP;
-	}
+	public abstract float GetMaxHP ();
 
 	public virtual float GetCurrentHP () {
 		return currentHP;

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class TimeManipulatorController : MonoBehaviour , ITimeManipulatorController {
+
+
 	private const float TIME_SLOW_EFFECT = 0.15f;
 	private const float TIME_PAUSE_EFFECT = 0f;
 	private const float TIME_STOP_EFFECT = 0f;

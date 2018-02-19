@@ -5,12 +5,8 @@ using UnityEngine;
 public class EnemyWatcherInput : MonoBehaviour , IInputController {
 	private ICameraController cameraController;
 	private IVirtualController virtualController;
+	private IAttackController attackController;
 	private SphereCollider attackRadiusTrigger;
-
-	private Timer attackTimer;
-	private float attackWaitSec = 0.5f;
-
-	private const string PROJECTILE_PREFAB = "Prefabs/Prototype 1 Enemies/Projectile";
 
 	private float visionRadius = 15.0f;
 
@@ -21,29 +17,17 @@ public class EnemyWatcherInput : MonoBehaviour , IInputController {
 		if ( virtualController == null ) {
 			virtualController = new NullVirtualController ();
 		}
-		/*
-		virtualController.SetMovementSpeedProperties (
-			0f,
-			0f,
-			turnSpeed,
-			0f
-		);
-		virtualController.SetRigidbodyProperties (
-			true, 
-			true
-		);
-		*/
+
+		attackController = GetComponent < IAttackController > ();
+		if ( attackController == null ) {
+			attackController = new NullAttackController ();
+		}
 
 		cameraController = new NullCameraController ();
 
-		attackTimer = new Timer ( attackWaitSec );
 		attackRadiusTrigger = gameObject.AddComponent < SphereCollider > ();
 		attackRadiusTrigger.isTrigger = true;
 		attackRadiusTrigger.radius = visionRadius;
-	}
-
-	void Update () {
-		attackTimer.updateTimer ( Time.deltaTime * virtualController.CurrentTimeEffect () );
 	}
 
 	public virtual void SetCameraController ( ICameraController cameraController ) {
@@ -120,9 +104,9 @@ public class EnemyWatcherInput : MonoBehaviour , IInputController {
 			)
 		);
 
-		if ( attackTimer.stopped () && virtualController.CurrentTimeEffect () != 0f ) {				
-			GameObject projectile = ( GameObject ) Instantiate ( Resources.Load ( PROJECTILE_PREFAB ) );
-
+		if ( !attackController.IsAttacking () && virtualController.CurrentTimeEffect () != 0f ) {				
+			/*
+			attackController.LightAttack ();
 			if ( projectile != null ) {
 				Vector3 projectilePosition = transform.position;
 
@@ -134,6 +118,7 @@ public class EnemyWatcherInput : MonoBehaviour , IInputController {
 			}
 		
 			attackTimer.startTimer ();
+			*/
 		}
 
 	}

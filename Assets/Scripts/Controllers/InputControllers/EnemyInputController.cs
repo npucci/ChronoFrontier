@@ -42,6 +42,7 @@ public class EnemyInputController : MonoBehaviour , IInputController {
 			virtualController.MovementStickInput (
 				xMovementStickInput,
 				yMovementStickInput,
+				cameraController.GetCameraUpDirection (),
 				cameraController.GetCameraForwardDirection (),
 				cameraController.GetCameraSideDirection ()
 			);

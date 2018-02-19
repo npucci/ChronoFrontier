@@ -169,6 +169,12 @@ public class DynamicCameraController : MonoBehaviour , ICameraController {
 		// do nothing
 	}
 
+	public virtual Vector3 GetCameraUpDirection () {
+		Vector3 cameraForwardDirection = transform.up;
+	
+		return cameraForwardDirection;
+	}
+
 	public Vector3 GetCameraForwardDirection () {
 		Vector3 cameraForwardDirection = transform.forward;
 		cameraForwardDirection.y = 0.0f;
