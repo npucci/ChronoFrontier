@@ -18,29 +18,29 @@ public class DynamicCameraController : MonoBehaviour , ICameraController {
 	private Vector3 thirdPersonCameraDistanceFromTarget = new Vector3 (
 		0.0f,
 		0.0f,
-		-5.0f
+		-6.0f
 	);
 
 	private Vector3 xySideScrollingCameraAngleFromTarget = new Vector3 (
-		15.0f,
+		10.0f,
 		0.0f,
 		0.0f
 	);
 	private Vector3 xySsideScrollingCameraDistanceFromTarget = new Vector3 (
 		0.0f,
-		2.0f,
-		-8.0f
+		0.0f,
+		-10.0f
 	);
 
 	private Vector3 zySideScrollingCameraAngleFromTarget = new Vector3 (
-		15.0f,
+		10.0f,
 		0.0f,
 		0.0f
 	);
 	private Vector3 zySideScrollingCameraDistanceFromTarget = new Vector3 (
 		0.0f,
-		2.0f,
-		-8.0f
+		0.0f,
+		-10.0f
 	);
 
 	private Vector3 thirdPersoncameraDistanceFromTarget;
@@ -171,15 +171,18 @@ public class DynamicCameraController : MonoBehaviour , ICameraController {
 
 	public virtual Vector3 GetCameraUpDirection () {
 		Vector3 cameraForwardDirection = transform.up;
-	
-		return cameraForwardDirection;
+		cameraForwardDirection.x = 0.0f;
+		cameraForwardDirection.z = 0.0f;
+		// return only y axis information
+		return cameraForwardDirection.normalized;
 	}
 
 	public Vector3 GetCameraForwardDirection () {
 		Vector3 cameraForwardDirection = transform.forward;
 		cameraForwardDirection.y = 0.0f;
+
 		// return only x and z axis information
-		return cameraForwardDirection;
+		return cameraForwardDirection; //.normalized;
 	}
 
 	public Vector3 GetCameraSideDirection () {
@@ -188,7 +191,7 @@ public class DynamicCameraController : MonoBehaviour , ICameraController {
 		// return only x and z axis information
 		cameraSideDirection.y = 0.0f;
 
-		return cameraSideDirection;
+		return cameraSideDirection.normalized;
 	}
 
 	public void SetColliderAndRigidbody () {

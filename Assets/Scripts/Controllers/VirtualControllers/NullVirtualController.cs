@@ -74,14 +74,6 @@ public class NullVirtualController : IVirtualController {
 		// do nothing
 	}
 
-	public virtual void TimeStatusEffect ( float slowDownEffect ) {
-		// do nothing
-	}
-
-	public virtual float CurrentTimeEffect () {
-		return 1f;
-	}
-
 	public Vector3 GetPosition () {
 		return Vector3.zero;
 	}

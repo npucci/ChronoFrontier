@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IAttackController {
+public interface IMeleeAttackController {
 	void LightAttack ( IHealthController healthController );
 	void HeavyAttack ( IHealthController healthController );
 	bool IsAttacking ();

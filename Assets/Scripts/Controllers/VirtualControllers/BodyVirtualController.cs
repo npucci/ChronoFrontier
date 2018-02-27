@@ -11,9 +11,12 @@ using UnityEngine;
 
 public abstract class BodyVirtualController : MonoBehaviour , IVirtualController {
 	private IHealthController healthController;
-	private IAttackController attackController;
 	private IInteractionController interactionController;
-	private ITimeManipulatorController timeManipulatorController;
+	private IJumpController jumpController;
+	private ITimeManipulatableController timeManipulatableController;
+	private ICombatController combatController;
+	private IProjectileAttackController timePauseProjectileAttackController;
+	private IProjectileAttackController timeSlowProjectileAttackController;
 
 	private Rigidbody rigidBody;
 	private float bodyMass;
@@ -22,23 +25,15 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 
 	private float normalSpeed;
 
-	private bool sliding = false;
-
 	private bool running = false;
 	private float runSpeedMax;
 	private float runSpeedIncrement;
 	private float currentRunSpeed = 0f;
 
 	private float turnSpeed;
-	private float jumpSpeed;
 
 	private float maxHP;
 	private float currentHP;
-
-	private float attackWaitSec;
-	private float attackWindowSec;
-	private Timer attackWaitTimer;
-	private Timer attackWindowTimer;
 
 	private bool interacting = false;
 
@@ -49,21 +44,18 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 	private bool timeSlowing = false;
 	private bool timePausing = false;
 	private bool timeStopping = false;
-	private float currentSlowDownEffect = 1f; 
 
 	void Start () {
 		bodyMass = GetBodyMass ();
 		drag = GetDrag ();
 		angularDrag = GetAngularDrag ();
 		normalSpeed = GetNormalSpeed ();
+
 		runSpeedMax = GetRunSpeedMax ();
 		runSpeedIncrement = GetRunSpeedIncrement ();
 		turnSpeed = GetTurnSpeed ();
-		jumpSpeed = GetJumpSpeed ();
+
 		maxHP = GetMaxHP ();
-		attackWaitSec = GetAttackWaitSec ();
-		attackWindowSec = GetAttackWindowSec ();
-		attackDamage = GetAttackDamage ();
 
 		rigidBody = GetComponent < Rigidbody > ();
 		if ( rigidBody == null ) {
@@ -80,9 +72,9 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 			healthController = new NullHealthController ();
 		}
 
-		attackController = GetComponent < IAttackController > ();
-		if ( attackController == null ) {
-			attackController = new NullAttackController ();
+		jumpController = GetComponent < IJumpController > ();
+		if ( jumpController == null ) {
+			jumpController = new NullJumpAttributes ();
 		}
 
 		interactionController = GetComponent < IInteractionController > ();
@@ -90,22 +82,29 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 			interactionController = new NullInteractionController ();
 		}
 			
-		timeManipulatorController = GetComponent < ITimeManipulatorController > ();
-		if ( timeManipulatorController == null ) {
-			timeManipulatorController = new NullTimeManipulatorController ();
+		timeManipulatableController = GetComponent < ITimeManipulatableController > ();
+		if ( timeManipulatableController == null ) {
+			timeManipulatableController = new NullTimeManipulatableController ();
 		}
 
-		attackWaitTimer = new Timer ( attackWaitSec );
-		attackWindowTimer = new Timer ( attackWindowSec );
-	}
-
-	void Update () {
-		attackWindowTimer.updateTimer ( Time.deltaTime );
-		attackWaitTimer.updateTimer ( Time.deltaTime );
+		combatController = GetComponent < ICombatController > ();
+		if ( combatController == null ) {
+			combatController = new NullCombatController ();
+		}
+			
+		timePauseProjectileAttackController = GetComponent < TimePauseProjectileAttackController > ();
+		if ( timePauseProjectileAttackController == null ) {
+			timePauseProjectileAttackController = new NullProjectileAttackController ();
+		}
+			
+		timeSlowProjectileAttackController = GetComponent < TimeSlowProjectileAttackController > ();
+		if ( timeSlowProjectileAttackController == null ) {
+			timeSlowProjectileAttackController = new NullProjectileAttackController ();
+		}
 	}
 
 	void FixedUpdate () {
-		if ( currentSlowDownEffect != 0.0f && currentSlowDownEffect != 1.0f ) {
+		if ( timeManipulatableController.TimeFactor () != 0.0f && timeManipulatableController.TimeFactor () != 1.0f ) {
 			rigidBody.AddForce ( 
 				Physics.gravity * rigidBody.mass * rigidBody.velocity.y * Time.deltaTime,
 				ForceMode.Acceleration
@@ -122,7 +121,7 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 		this.normalSpeed = movementSpeed;
 		this.runSpeedMax = runningSpeed;
 		this.turnSpeed = turnSpeed;
-		this.jumpSpeed = jumpingSpeed;
+
 	}
 
 	public virtual void SetRigidbodyProperties ( 
@@ -140,6 +139,7 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 		Vector3 forwardDirection,
 		Vector3 sideDirection
 	) {
+
 		if ( !running && 0.0f < currentRunSpeed ) {
 			currentRunSpeed -= runSpeedIncrement;
 
@@ -147,7 +147,6 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 				currentRunSpeed = 0.0f;
 			}
 		} 
-
 		else if ( running && currentRunSpeed < runSpeedMax )  {
 			currentRunSpeed += runSpeedIncrement;
 
@@ -166,50 +165,6 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 		);
 	}
 
-	public virtual void AttackButton ( bool clicked ) {
-		if ( attackWaitTimer.stopped () ) {
-			attackWaitTimer.startTimer ();
-			attackWindowTimer.startTimer ();
-		}
-	}
-
-	public virtual void RunButton (  bool clicked ) {
-		if ( onGround () ) {
-			running = clicked;
-		} 
-	}
-
-	public virtual void Slide ( bool clicked ) {
-		if ( onGround () ) {
-			sliding = clicked;
-		} 
-	}
-
-	public virtual void JumpButton ( bool clicked ) {
-		if ( rigidBody == null || !onGround () || !clicked ) {
-			return;
-		}
-
-		float currentVelocityX = rigidBody.velocity [ 0 ];
-		float currentVelocityZ = rigidBody.velocity [ 2 ];
-
-		Vector3 jumpVelocity = new Vector3 (
-			currentVelocityX,
-			jumpSpeed,
-			currentVelocityZ
-		);
-
-		rigidBody.velocity = jumpVelocity;
-	}
-
-	public virtual void InteractionButton ( bool clicked ) {
-		interacting = clicked;
-	}
-
-	public virtual void MagicButton ( bool clicked ) {
-		magicAttacking = clicked;
-	}
-
 	private void Move (
 		float movementSpeed,
 		float horizontalMovementStickInput,
@@ -218,21 +173,24 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 		Vector3 forwardDirection,
 		Vector3 sideDirection
 	) {
-		
 		if ( rigidBody == null ) {
 			return;
 		}
 
-		if ( currentSlowDownEffect == 0.0f ) {
+		if ( timeManipulatableController.TimeFactor () == 0.0f ) {
 			return;
 		}
-	
-		if ( horizontalMovementStickInput == 0.0f && verticalMovementStickInput == 0.0f ) {
+
+		bool hasInput = horizontalMovementStickInput != 0f || verticalMovementStickInput != 0f;
+		if ( !hasInput ) {
+			Vector3 slowedVelocity = rigidBody.velocity;
+			slowedVelocity.x *= 0.9f;
+			slowedVelocity.z *= 0.9f;
+			rigidBody.velocity = slowedVelocity;
 			return;
 		}
 			
-		//rigidBody.AddForce ( Physics.gravity * rigidBody.mass * slowDownEffect );
-		movementSpeed *= currentSlowDownEffect;
+		movementSpeed *= timeManipulatableController.TimeFactor ();
 
 		// 1. get forward direction of camera
 		Vector3 cameraForwardDirection = forwardDirection;
@@ -250,18 +208,25 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 		Vector3 newVelocity = newForwardVelocity + newSideVelocity;
 
 		// 6. calculate Slerp for new rotation, between the original velocity and the new velocity
-		Quaternion desiredRotation = Quaternion.LookRotation (
+		//Quaternion desiredRotation = Quaternion.LookRotation (
+		//	newVelocity,
+		//	upDirection
+		//);
+
+		Quaternion desiredRotation = Quaternion.LookRotation ( 
 			newVelocity,
-			upDirection
+			upDirection	
 		);
 
+		rigidBody.rotation = desiredRotation;
+
 		// 7. check if desired rotation is not the zero vector: if so, there is no change in rotation
-		if ( !desiredRotation.eulerAngles.Equals ( Vector3.zero ) ) {
-			DesiredRotation ( desiredRotation );
-		}
+		//if ( !desiredRotation.eulerAngles.Equals ( Vector3.zero ) ) {
+		//	DesiredRotation ( desiredRotation );
+		//}
 
 		// 10. maintain original y-axis velocity, i.e. gravity or jumping 
-		newVelocity.y = rigidBody.velocity.y * currentSlowDownEffect;
+		newVelocity.y = rigidBody.velocity.y * timeManipulatableController.TimeFactor ();
 
 		// 11. apply new velocity to rigidBody
 		rigidBody.velocity = newVelocity;
@@ -271,7 +236,7 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 		Quaternion newRotation = Quaternion.Slerp ( 
 			rigidBody.rotation,
 			desiredRotation,
-			turnSpeed * Time.deltaTime * currentSlowDownEffect
+			turnSpeed * Time.deltaTime * timeManipulatableController.TimeFactor ()	
 		);
 
 		// 8. maintain original xz-axis rotation
@@ -281,73 +246,73 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 		// 9. apply new rotation to rigidBody
 		rigidBody.rotation = newRotation;
 	}
+
+	public virtual void AttackButton ( bool clicked ) {
+		// TODO: implement better combat system
+	}
+
+	public virtual void RunButton (  bool clicked ) {
+		if ( onGround () ) {
+			running = clicked;
+		} 
+	}
+
+	public virtual void Slide ( bool clicked ) {
+		// TODO: deprecated?
+	}
+
+	public virtual void JumpButton ( bool clicked ) {
+		if ( clicked ) {
+			jumpController.Jump ( rigidBody );
+		}
+	}
+
+	public virtual void InteractionButton ( bool clicked ) {
+		interacting = clicked;
+	}
+
+	public virtual void MagicButton ( bool clicked ) {
+		magicAttacking = clicked;
+	}
 		
 	private bool onGround () {
 		Vector3 down = transform.TransformDirection ( Vector3.down );
-	
-		if ( Physics.Raycast (
-			rigidBody.position,
-			down,
-			1.0f
-		) ) {
-			return true;
+
+		bool zeroVerticalVelocity = ( rigidBody.velocity.y == 0.0f );
+
+		if ( zeroVerticalVelocity ) {
+			return zeroVerticalVelocity;
 		}
 
-		return rigidBody.velocity.y == 0.0f;
+		bool rayCastHit = Physics.Raycast (
+			rigidBody.position,
+	        down,
+	        1.0f
+	    );
+
+		return rayCastHit;
 	}
 
 	public Vector3 GetPosition () {
 		return rigidBody.position;
 	}
 
-	public virtual void TimeStatusEffect ( float slowDownEffect ) {
-		this.currentSlowDownEffect = slowDownEffect;
-
-		if ( slowDownEffect == 0.0f ) {
-			rigidBody.isKinematic = true;
-			rigidBody.useGravity = false;
-		} 
-
-		else {
-			rigidBody.isKinematic = false;
-			rigidBody.useGravity = true;
-		}
-	}
-
-	public virtual float CurrentTimeEffect () {
-		return currentSlowDownEffect;
-	}
-
 	public virtual void TimeSlowButton ( bool clicked ) {
-		timeSlowing = clicked;
-		if ( timeSlowing ) {
-			timeManipulatorController.TimeSlow ();	
-		}
-
-		else if ( !timePausing && !timeStopping ) {
-			timeManipulatorController.TimeRestore ();
-		}
+		timeSlowProjectileAttackController.FireProjectile ( null );
 	}
 
 	public virtual void TimePauseButton ( bool clicked ) {
-		timePausing = clicked;
-		if ( timePausing ) {
-			timeManipulatorController.TimePause ();
-		}
-
-		else if ( !timeSlowing && !timeStopping ) {
-			timeManipulatorController.TimeRestore ();
-		}
+		timePauseProjectileAttackController.FireProjectile ( null );
 	}
 
 	public virtual void TimeStopButton ( bool clicked ) {
 		timeStopping = clicked;
 		if ( timeSlowing ) {
-			timeManipulatorController.TimeStop ();	
+			//timeManipulatorController.TimeStop ();	
 		}
 
 		else if ( !timePausing && !timeSlowing ) {
-			timeManipulatorController.TimeRestore ();
+			//timeManipulatorController.TimeRestore ();
 		}
 	}
 
@@ -370,15 +335,13 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 			distanceZ < xzDistanceMax && 
 			distanceY < yDistanceMax;    
 
-		if ( enemyHealthController != null && !attackController.IsAttacking () ) {
-			attackController.LightAttack ( enemyHealthController );
+		if ( enemyHealthController != null ) {
+			combatController.LightMeleeAttack ( enemyHealthController );
 		}
 
 		if ( !timeSlowing && !timePausing && !timeStopping ) {
 			return;
 		}
-
-		timeManipulatorController.AddTimeManipulatableObject ( virtualController );
 	}
 
 	void OnTriggerStay ( Collider collider ) {
@@ -400,22 +363,21 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 			distanceZ < xzDistanceMax && 
 			distanceY < yDistanceMax;    
 
-		if ( enemyHealthController != null && !attackController.IsAttacking () ) {
-			attackController.LightAttack ( enemyHealthController );
+		if ( enemyHealthController != null ) {
+			combatController.LightMeleeAttack ( enemyHealthController );
 		}
 
 		if ( timeSlowing || timePausing || timeStopping ) {
-			timeManipulatorController.AddTimeManipulatableObject ( virtualController );
+			//timeManipulatorController.AddTimeManipulatableObject ( virtualController );
 		}
 	}
 
 	void OnTriggerExit ( Collider collider ) {
 		BodyVirtualController virtualController = collider.GetComponent < BodyVirtualController > ();
 		if ( virtualController != null ) {
-			timeManipulatorController.RemoveTimeManipulatableObject ( virtualController );
+			//timeManipulatorController.RemoveTimeManipulatableObject ( virtualController );
 		}
 	}
-
 
 	protected abstract float GetBodyMass ();
 

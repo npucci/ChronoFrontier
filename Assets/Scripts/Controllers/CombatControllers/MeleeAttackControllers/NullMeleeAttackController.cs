@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NullAttackController : IAttackController {
+public class NullMeleeAttackController : IMeleeAttackController {
 	public virtual void LightAttack ( IHealthController healthController ) {
 		// do nothing
 	}

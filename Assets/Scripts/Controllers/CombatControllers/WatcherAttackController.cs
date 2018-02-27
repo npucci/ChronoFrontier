@@ -4,10 +4,6 @@ using UnityEngine;
 
 public class WatcherAttackController : ProjectileAttackController {
 
-	protected override float GetProjectileAttackDamage () {
-		return 15f;
-	}
-
 	protected override float GetAttackCoolDownSec () {
 		return 0.2f;
 	}

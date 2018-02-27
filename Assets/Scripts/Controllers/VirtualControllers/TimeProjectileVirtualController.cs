@@ -2,52 +2,52 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerBodyVirtualController : BodyVirtualController {
+public class TimeProjectileVirtualController : BodyVirtualController {
 	protected override float GetBodyMass () {
-		return 54.0f;
+		return 0.0f;
 	}
 
 	protected override float GetDrag () {
-		return 1.5f;
+		return 0f;
 	} 
 
 	protected override float GetAngularDrag () {
-		return 1.5f;
+		return 0f;
 	} 
 
 	protected override float GetNormalSpeed () {
-		return 12.0f;
+		return 0f;
 	} 
 
 	protected override float GetRunSpeedMax () {
-		return 5.0f;
+		return 0f;
 	} 
 
 	protected override float GetRunSpeedIncrement () {
-		return 0.5f;
+		return 0f;
 	} 
 
 	protected override float GetTurnSpeed () {
-		return 12f;//15.2f;
+		return 0f;
 	} 
 
 	protected override float GetJumpSpeed () {
-		return 13.0f;
+		return 0f;
 	} 
-		
+
 	protected override float GetMaxHP () {
-		return 100.0f;
+		return 0f;
 	} 
 
 	protected override float GetAttackWaitSec () {
-		return 0.2f;
+		return 0f;
 	} 
 
 	protected override float GetAttackWindowSec () {
-		return 0.1f;
+		return 0f;
 	} 
 
 	protected override float GetAttackDamage () {
-		return 15.0f;
+		return 0f;
 	} 
 }

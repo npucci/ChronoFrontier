@@ -48,6 +48,10 @@ public class Timer {
 		this.timerAmount = timerAmount;
 	}
 
+	public float timerAmountMax () {
+		return timerAmount;
+	}
+
 	public float currentTimeRemaining () {
 		return countDown;
 	}

@@ -23,6 +23,12 @@ public class PlayerInputController : MonoBehaviour , IInputController {
 	float verticalViewStickInput = 0.0f;
 
 	bool inputEnabled = true;
+	bool jumpButtonPressed = false;
+	bool runButtonPressed = false;
+	bool lightAttackButtonPressed = false;
+	bool heavyAttackButtonPressed = false;
+	bool timeSlowButtonPressed = false;
+	bool timePauseButtonPressed = false;
 
 	private Vector3 lockPositionAxis = Vector3.zero;
 
@@ -37,6 +43,10 @@ public class PlayerInputController : MonoBehaviour , IInputController {
 		
 	// player input
 	void Update () {
+		if ( !inputEnabled ) {
+			return;
+		}
+
 		horizontalMovementStickInput = Input.GetAxis ( INPUT_MOVEMENT_STICK_HORIZONTAL );
 		verticalMovementStickInput = Input.GetAxis ( INPUT_MOVEMENT_STICK_VERTICAL );
 
@@ -50,21 +60,7 @@ public class PlayerInputController : MonoBehaviour , IInputController {
 			horizontalViewStickInput = 0f;
 			verticalViewStickInput = 0f;
 		}
-	}
 
-	// rigidbody and physics calculations 
-	void FixedUpdate () {
-
-		cameraController.UpdateCameraPositioning (
-			horizontalViewStickInput,
-			verticalViewStickInput,
-			GetPosition ()
-		);
-
-		if ( !inputEnabled ) {
-			return;
-		}
-			
 		if ( !GetCameraMode ().Equals ( CameraMode.THIRD_PERSON ) ) {
 			verticalMovementStickInput = 0.0f;
 			horizontalViewStickInput = 0.0f;
@@ -72,32 +68,81 @@ public class PlayerInputController : MonoBehaviour , IInputController {
 		}
 
 		if ( Input.GetButtonDown ( INPUT_JUMP_BUTTON ) ) {
-			virtualController.JumpButton ( true );
+			jumpButtonPressed = true;
 		}
 
 		if ( Input.GetButtonDown ( INPUT_ATTACK_BUTTON ) ) {
-			virtualController.AttackButton ( true );
+			lightAttackButtonPressed = true;
 		}
 
-		//if ( Input.GetButton ( INPUT_RUN_BUTTON ) ) {
-		//	virtualController.RunButton ( Input.GetButton ( INPUT_RUN_BUTTON ) );
-		//}
-
-		bool newMovementInput = horizontalMovementStickInput != 0.0f || verticalMovementStickInput != 0.0f;
-		if ( newMovementInput ) {
-
-			virtualController.MovementStickInput (
-				horizontalMovementStickInput,
-				verticalMovementStickInput,
-				cameraController.GetCameraUpDirection (),
-				cameraController.GetCameraForwardDirection (),
-				cameraController.GetCameraSideDirection ()
-			);
-
+		if ( Input.GetButtonDown ( INPUT_ATTACK_BUTTON ) ) {
+			heavyAttackButtonPressed = true;
 		}
-	
-		virtualController.TimeSlowButton ( Input.GetButton ( INPUT_TIME_SLOWING_BUTTON ) );
-		virtualController.TimePauseButton ( Input.GetButton ( INPUT_TIME_PAUSING_BUTTON ) );	
+
+		if ( Input.GetButtonDown ( INPUT_RUN_BUTTON ) ) {
+			runButtonPressed = true;
+		}
+
+		if ( Input.GetButtonDown ( INPUT_TIME_PAUSING_BUTTON ) ) {
+			timePauseButtonPressed = true;
+		}
+
+		if ( Input.GetButtonDown ( INPUT_TIME_SLOWING_BUTTON ) ) {
+			timeSlowButtonPressed = true;
+		}
+	}
+
+	// update camera movement after physics and movement
+	void LateUpdate () {
+		cameraController.UpdateCameraPositioning (
+			horizontalViewStickInput,
+			verticalViewStickInput,
+			GetPosition ()
+		);
+	}
+
+	// rigidbody and physics calculations 
+	void FixedUpdate () {
+
+		if ( jumpButtonPressed ) {
+			virtualController.JumpButton ( jumpButtonPressed );
+			jumpButtonPressed = false;
+		}
+
+		if ( runButtonPressed ) {
+			//virtualController.RunButton ( runButtonPressed );
+			//runButtonPressed = false;
+		}
+
+		if ( lightAttackButtonPressed ) {
+			virtualController.AttackButton ( lightAttackButtonPressed );
+			lightAttackButtonPressed = false;
+		}
+
+		if ( heavyAttackButtonPressed ) {
+			virtualController.AttackButton ( heavyAttackButtonPressed );
+			heavyAttackButtonPressed = false;
+		}
+			
+
+		if ( timePauseButtonPressed ) {
+			virtualController.TimePauseButton ( timePauseButtonPressed );
+			timePauseButtonPressed = false;
+		}
+			
+
+		if ( timeSlowButtonPressed ) {
+			virtualController.TimeSlowButton ( timeSlowButtonPressed );
+			timeSlowButtonPressed = false;
+		}
+
+		virtualController.MovementStickInput (
+			horizontalMovementStickInput,
+			verticalMovementStickInput,
+			cameraController.GetCameraUpDirection (),
+			cameraController.GetCameraForwardDirection (),
+			cameraController.GetCameraSideDirection ()
+		);
 	}
 
 	private void SetVirtualController () {

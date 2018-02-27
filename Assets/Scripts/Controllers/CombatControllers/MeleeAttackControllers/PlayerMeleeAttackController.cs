@@ -12,11 +12,11 @@ public class PlayerAttackController : MeleeAttackController {
 		return 20f;
 	}
 
-	protected override float GetAttackCoolDownSec () {
-		return 0.2f;
+	protected override float GetLightAttackWindowSec () {
+		return 0.1f;
 	}
 
-	protected override float GetAttackWindowSec () {
-		return 0.1f;
+	protected override float GetHeavyAttackWindowSec () {
+		return 0.2f;
 	}
 }

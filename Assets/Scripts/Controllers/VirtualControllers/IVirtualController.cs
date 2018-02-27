@@ -43,9 +43,5 @@ public interface IVirtualController {
 
 	void TimeStopButton ( bool clicked );
 
-	void TimeStatusEffect ( float slowDownEffect );
-
-	float CurrentTimeEffect ();
-
 	Vector3 GetPosition ();
 }

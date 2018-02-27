@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ProjectileInputController : MonoBehaviour , IInputController {
-	private IAttackController attackController;
+	private ICombatController combatController;
 	private float lifeTimeSec = 2f;
 	private Timer lifeTimer;
 	private float attackDamage = 20.0f;
@@ -18,9 +18,9 @@ public class ProjectileInputController : MonoBehaviour , IInputController {
 
 	// Use this for initialization
 	void Start () {
-		attackController = GetComponent < IAttackController > ();
-		if ( attackController == null ) {
-			attackController = new NullAttackController ();
+		combatController = GetComponent < ICombatController > ();
+		if ( combatController == null ) {
+			combatController = new NullCombatController ();
 		}
 
 		virtualController = GetComponent < IVirtualController > ();
@@ -51,12 +51,12 @@ public class ProjectileInputController : MonoBehaviour , IInputController {
 			transform.right
 		);
 
-		if ( lifeTimer.stopped () && virtualController.CurrentTimeEffect () != 0f ) {
+		if ( lifeTimer.stopped () ) {
 			Destroy ( gameObject );
 		}
 
-		lifeTimer.updateTimer ( Time.deltaTime * virtualController.CurrentTimeEffect () );
-		indestructableTimer.updateTimer ( Time.deltaTime * virtualController.CurrentTimeEffect () );
+		//lifeTimer.updateTimer ( Time.deltaTime * virtualController.CurrentTimeEffect () );
+		//indestructableTimer.updateTimer ( Time.deltaTime * virtualController.CurrentTimeEffect () );
 	}
 
 	public virtual void SetCameraController ( ICameraController cameraController ) {
@@ -101,11 +101,7 @@ public class ProjectileInputController : MonoBehaviour , IInputController {
 
 		IHealthController healthController = collision.gameObject.GetComponent < IHealthController > ();
 		if ( healthController != null ) {
-			attackController.LightAttack ( healthController );
+			combatController.LightMeleeAttack ( healthController );
 		} 
-
-		if ( virtualController.CurrentTimeEffect () != 0f ) {
-			Destroy ( gameObject );
-		}
 	}
 }

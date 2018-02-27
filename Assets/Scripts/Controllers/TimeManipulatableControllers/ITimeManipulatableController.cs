@@ -3,5 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public interface ITimeManipulatableController {
-	void TimeEffect ( float slowDownEffect );
+	void UpdateTimeFactor ( float timeFactor );
+	float TimeFactor ();
 }

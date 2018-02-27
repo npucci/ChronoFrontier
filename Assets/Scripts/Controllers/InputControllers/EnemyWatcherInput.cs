@@ -5,7 +5,7 @@ using UnityEngine;
 public class EnemyWatcherInput : MonoBehaviour , IInputController {
 	private ICameraController cameraController;
 	private IVirtualController virtualController;
-	private IAttackController attackController;
+	private ICombatController combatController;
 	private SphereCollider attackRadiusTrigger;
 
 	private float visionRadius = 15.0f;
@@ -18,9 +18,9 @@ public class EnemyWatcherInput : MonoBehaviour , IInputController {
 			virtualController = new NullVirtualController ();
 		}
 
-		attackController = GetComponent < IAttackController > ();
-		if ( attackController == null ) {
-			attackController = new NullAttackController ();
+		combatController = GetComponent < ICombatController > ();
+		if ( combatController == null ) {
+			combatController = new NullCombatController ();
 		}
 
 		cameraController = new NullCameraController ();
@@ -104,7 +104,7 @@ public class EnemyWatcherInput : MonoBehaviour , IInputController {
 			)
 		);
 
-		if ( !attackController.IsAttacking () && virtualController.CurrentTimeEffect () != 0f ) {				
+		//if ( !combatController.IsAttacking ) {				
 			/*
 			attackController.LightAttack ();
 			if ( projectile != null ) {
@@ -119,7 +119,7 @@ public class EnemyWatcherInput : MonoBehaviour , IInputController {
 		
 			attackTimer.startTimer ();
 			*/
-		}
+		//}
 
 	}
 }
