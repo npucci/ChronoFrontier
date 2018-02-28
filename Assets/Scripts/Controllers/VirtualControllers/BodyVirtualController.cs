@@ -19,9 +19,6 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 	private IProjectileAttackController timeSlowProjectileAttackController;
 
 	private Rigidbody rigidBody;
-	private float bodyMass;
-	private float drag;
-	private float angularDrag;
 
 	private float normalSpeed;
 
@@ -46,9 +43,6 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 	private bool timeStopping = false;
 
 	void Start () {
-		bodyMass = GetBodyMass ();
-		drag = GetDrag ();
-		angularDrag = GetAngularDrag ();
 		normalSpeed = GetNormalSpeed ();
 
 		runSpeedMax = GetRunSpeedMax ();
@@ -61,11 +55,7 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 		if ( rigidBody == null ) {
 			rigidBody = gameObject.AddComponent < Rigidbody > ();
 		}
-		rigidBody.mass = bodyMass;
-		rigidBody.drag = drag;
-		rigidBody.angularDrag = angularDrag;
-		rigidBody.freezeRotation = true;
-		rigidBody.isKinematic = false;
+		SetRigidbodyProperties ();
 
 		healthController = GetComponent < IHealthController > ();
 		if ( healthController == null ) {
@@ -124,12 +114,13 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 
 	}
 
-	public virtual void SetRigidbodyProperties ( 
-		bool useGravity, 
-		bool isKinematic 
-	) {
-		rigidBody.useGravity = useGravity;
-		rigidBody.isKinematic = isKinematic;
+	public virtual void SetRigidbodyProperties () {
+		rigidBody.mass = GetBodyMass ();
+		rigidBody.drag = GetDrag ();
+		rigidBody.angularDrag = GetAngularDrag ();
+		rigidBody.freezeRotation = IsFreezeRotation ();
+		rigidBody.isKinematic = IsKinematic ();
+		rigidBody.useGravity = UseGravity ();
 	}
 
 	public virtual void MovementStickInput (
@@ -208,17 +199,12 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 		Vector3 newVelocity = newForwardVelocity + newSideVelocity;
 
 		// 6. calculate Slerp for new rotation, between the original velocity and the new velocity
-		//Quaternion desiredRotation = Quaternion.LookRotation (
-		//	newVelocity,
-		//	upDirection
-		//);
-
 		Quaternion desiredRotation = Quaternion.LookRotation ( 
 			newVelocity,
 			upDirection	
 		);
 
-		rigidBody.rotation = desiredRotation;
+		DesiredRotation ( desiredRotation );
 
 		// 7. check if desired rotation is not the zero vector: if so, there is no change in rotation
 		//if ( !desiredRotation.eulerAngles.Equals ( Vector3.zero ) ) {
@@ -384,6 +370,12 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 	protected abstract float GetDrag ();
 
 	protected abstract float GetAngularDrag ();
+
+	protected abstract bool IsFreezeRotation ();
+
+	protected abstract bool IsKinematic ();
+
+	protected abstract bool UseGravity ();
 
 	protected abstract float GetNormalSpeed ();
 

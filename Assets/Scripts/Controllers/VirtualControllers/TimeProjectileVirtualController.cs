@@ -15,8 +15,20 @@ public class TimeProjectileVirtualController : BodyVirtualController {
 		return 0f;
 	} 
 
+	protected override bool IsFreezeRotation () {
+		return true;
+	} 
+
+	protected override bool IsKinematic () {
+		return false;
+	} 
+
+	protected override bool UseGravity () {
+		return false;
+	} 
+
 	protected override float GetNormalSpeed () {
-		return 0f;
+		return 1f;
 	} 
 
 	protected override float GetRunSpeedMax () {

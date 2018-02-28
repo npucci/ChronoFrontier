@@ -27,10 +27,7 @@ public class NullVirtualController : IVirtualController {
 		// do nothing
 	}
 
-	public virtual void SetRigidbodyProperties ( 
-		bool useGravity, 
-		bool isKinematic 
-	) {
+	public virtual void SetRigidbodyProperties () {
 		// do nothing
 	}
 

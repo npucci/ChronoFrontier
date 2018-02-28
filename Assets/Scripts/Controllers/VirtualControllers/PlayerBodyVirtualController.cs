@@ -15,6 +15,18 @@ public class PlayerBodyVirtualController : BodyVirtualController {
 		return 1.5f;
 	} 
 
+	protected override bool IsFreezeRotation () {
+		return true;
+	} 
+
+	protected override bool IsKinematic () {
+		return false;
+	} 
+
+	protected override bool UseGravity () {
+		return true;
+	} 
+
 	protected override float GetNormalSpeed () {
 		return 12.0f;
 	} 
@@ -28,7 +40,7 @@ public class PlayerBodyVirtualController : BodyVirtualController {
 	} 
 
 	protected override float GetTurnSpeed () {
-		return 12f;//15.2f;
+		return 12f;
 	} 
 
 	protected override float GetJumpSpeed () {

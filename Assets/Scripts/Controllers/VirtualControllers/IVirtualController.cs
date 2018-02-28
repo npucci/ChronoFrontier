@@ -11,10 +11,7 @@ public interface IVirtualController {
 		Vector3 sideDirection
 	);
 
-	void SetRigidbodyProperties ( 
-		bool useGravity, 
-		bool isKinematic 
-	);
+	void SetRigidbodyProperties ();
 
 	void SetMovementSpeedProperties ( 
 		float movementSpeed, 

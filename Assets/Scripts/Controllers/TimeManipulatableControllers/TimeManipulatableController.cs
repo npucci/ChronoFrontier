@@ -3,10 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class TimeManipulatableController : MonoBehaviour , ITimeManipulatableController {
-	float currentTimeFactor = 1f;
-	Rigidbody rigidBody;
+	private IVirtualController virtualController;
+	private float currentTimeFactor = 1f;
+	private Rigidbody rigidBody;
 
 	void Start () {
+		virtualController = GetComponent < IVirtualController > ();
+		if ( virtualController == null ) {
+			virtualController = new NullVirtualController ();	
+		}
+
 		rigidBody = GetComponent < Rigidbody > ();
 	}
 
@@ -19,12 +25,10 @@ public class TimeManipulatableController : MonoBehaviour , ITimeManipulatableCon
 
 		if ( timeFactor == 0f ) {
 			rigidBody.isKinematic = true;
-			rigidBody.useGravity = false;
 		} 
 
 		else {
-			rigidBody.isKinematic = false;
-			rigidBody.useGravity = true;
+			virtualController.SetRigidbodyProperties ();
 		}
 
 	}

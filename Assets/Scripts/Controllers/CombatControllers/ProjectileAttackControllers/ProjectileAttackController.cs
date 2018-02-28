@@ -17,16 +17,12 @@ public abstract class ProjectileAttackController : MonoBehaviour , IProjectileAt
 	}
 
 	public virtual void FireProjectile ( IHealthController healthController ) {
-		Debug.Log ( "Enter FireProjectile ()" );
-
 		if ( !IsFiringProjectile () ) {
-			Debug.Log ( "firing" );
 			fireCoolDownTimer.startTimer ();
 			GameObject projectile = ( GameObject ) Instantiate ( Resources.Load ( GetProjectilePrefabName () ) );
 			if ( projectile != null ) {
-				Debug.Log ( "Instantiated" );
 				projectile.transform.position = transform.position;
-				projectile.transform.up = transform.forward;
+				projectile.transform.forward = transform.forward;
 			}
 		}
 	}

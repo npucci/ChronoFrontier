@@ -11,6 +11,9 @@ public abstract class TimeManipulatorController : MonoBehaviour , ITimeManipulat
 	private Collider timeFieldCollider;
 	private Renderer timeFieldRenderer;
 
+	private float changeFactor = 0.01f;
+	float direction = 1f;
+
 	private HashSet < ITimeManipulatableController > timeManipulatableObjects = new HashSet < ITimeManipulatableController > ();
 
 	void Start () {
@@ -21,6 +24,24 @@ public abstract class TimeManipulatorController : MonoBehaviour , ITimeManipulat
 		lifeTimeController.SetLifeTimeListener ( this );
 
 		ManipulateTime ();
+	}
+
+	void Update () {
+		float currentScale = transform.localScale.x;
+
+		if ( TimeManipulationSphereScale () < currentScale ) {
+			direction *= -1f; 
+		} 
+
+		else if ( currentScale < TimeManipulationSphereScale () - 0.5f ) {
+			direction = 1f;
+		}
+
+		transform.localScale = new Vector3 ( 
+			currentScale + ( changeFactor * direction ),
+			currentScale + ( changeFactor * direction ),
+			currentScale + ( changeFactor * direction )
+		);
 	}
 
 	public virtual void ManipulateTime () {
@@ -38,7 +59,7 @@ public abstract class TimeManipulatorController : MonoBehaviour , ITimeManipulat
 			);
 			timeFieldRenderer.enabled = true;
 		}
-			
+
 		timeFieldCollider = GetComponent < Collider > ();
 		if ( timeFieldCollider != null ) {
 			timeFieldCollider.isTrigger = true;
@@ -96,6 +117,12 @@ public abstract class TimeManipulatorController : MonoBehaviour , ITimeManipulat
 		}
 			
 		ManipulateTimeManipulatableObject ( virtualController );
+
+		// stop motion
+		Rigidbody rigidBody = GetComponent < Rigidbody > ();
+		if ( rigidBody != null ) {
+			rigidBody.isKinematic = true;
+		}
 	}
 
 	void OnTriggerExit ( Collider collider ) {
@@ -112,8 +139,6 @@ public abstract class TimeManipulatorController : MonoBehaviour , ITimeManipulat
 	public virtual void OnLifeTimeEnd () {
 		RestoreTime ();
 		Destroy ( gameObject );
-
-		Debug.Log ( "destroyed" );
 	}
 
 }
