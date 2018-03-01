@@ -51,7 +51,6 @@ public abstract class LifeTimeController : MonoBehaviour , ILifeTimeController {
 
 	public virtual void SetLifeTimeListener ( ILifeTimeListener lifeTimeListener ) {
 		this.lifeTimeListener = lifeTimeListener;
-		Debug.Log ( "listener added" );
 	}
 
 	private void NotifyLifeTimeListener () {

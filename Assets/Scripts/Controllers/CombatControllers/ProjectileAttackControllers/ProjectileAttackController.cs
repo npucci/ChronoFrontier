@@ -4,12 +4,15 @@ using UnityEngine;
 
 public abstract class ProjectileAttackController : MonoBehaviour , IProjectileAttackController {
 	private float coolDownWaitSec;
+	private float projectileSpawnDistanceFactor = 1f;
 	private Timer fireCoolDownTimer;
+	private Rigidbody rigidBody;
 
 	void Start () {
 		coolDownWaitSec = GetAttackCoolDownSec ();
 
 		fireCoolDownTimer = new Timer ( coolDownWaitSec );
+		rigidBody = GetComponent < Rigidbody > ();
 	}
 
 	void Update () {
@@ -20,9 +23,26 @@ public abstract class ProjectileAttackController : MonoBehaviour , IProjectileAt
 		if ( !IsFiringProjectile () ) {
 			fireCoolDownTimer.startTimer ();
 			GameObject projectile = ( GameObject ) Instantiate ( Resources.Load ( GetProjectilePrefabName () ) );
+
 			if ( projectile != null ) {
-				projectile.transform.position = transform.position;
-				projectile.transform.forward = transform.forward;
+				Vector3 forwardDistance = transform.forward * projectileSpawnDistanceFactor;
+				Vector3 projectileSpawnPosition = transform.position + forwardDistance;
+
+				Rigidbody projectileRigidBody = projectile.GetComponent < Rigidbody > ();
+				if ( projectileRigidBody != null ) {
+					
+					projectileRigidBody.position = projectileSpawnPosition;
+					projectile.transform.forward = transform.forward;
+
+					if ( rigidBody != null ) {
+						projectileRigidBody.velocity = rigidBody.velocity;
+					}
+				}
+
+				else {
+					projectile.transform.position = projectileSpawnPosition;
+					projectile.transform.forward = transform.forward;
+				}
 			}
 		}
 	}

@@ -43,7 +43,7 @@ public class NullVirtualController : IVirtualController {
 		// do nothing
 	}
 
-	public virtual void Slide ( bool clicked ) {
+	public virtual void BoostButton ( bool clicked ) {
 		// do nothing
 	}
 

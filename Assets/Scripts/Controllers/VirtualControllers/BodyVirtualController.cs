@@ -13,6 +13,7 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 	private IHealthController healthController;
 	private IInteractionController interactionController;
 	private IJumpController jumpController;
+	private IDashController dashController;
 	private ITimeManipulatableController timeManipulatableController;
 	private ICombatController combatController;
 	private IProjectileAttackController timePauseProjectileAttackController;
@@ -21,12 +22,6 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 	private Rigidbody rigidBody;
 
 	private float normalSpeed;
-
-	private bool running = false;
-	private float runSpeedMax;
-	private float runSpeedIncrement;
-	private float currentRunSpeed = 0f;
-
 	private float turnSpeed;
 
 	private float maxHP;
@@ -44,9 +39,6 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 
 	void Start () {
 		normalSpeed = GetNormalSpeed ();
-
-		runSpeedMax = GetRunSpeedMax ();
-		runSpeedIncrement = GetRunSpeedIncrement ();
 		turnSpeed = GetTurnSpeed ();
 
 		maxHP = GetMaxHP ();
@@ -65,6 +57,11 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 		jumpController = GetComponent < IJumpController > ();
 		if ( jumpController == null ) {
 			jumpController = new NullJumpAttributes ();
+		}
+
+		dashController = GetComponent < IDashController > ();
+		if ( dashController == null ) {
+			dashController = new NullDashController ();
 		}
 
 		interactionController = GetComponent < IInteractionController > ();
@@ -109,9 +106,7 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 		float jumpingSpeed
 	) {
 		this.normalSpeed = movementSpeed;
-		this.runSpeedMax = runningSpeed;
 		this.turnSpeed = turnSpeed;
-
 	}
 
 	public virtual void SetRigidbodyProperties () {
@@ -131,23 +126,8 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 		Vector3 sideDirection
 	) {
 
-		if ( !running && 0.0f < currentRunSpeed ) {
-			currentRunSpeed -= runSpeedIncrement;
-
-			if ( currentRunSpeed < 0.0f ) {
-				currentRunSpeed = 0.0f;
-			}
-		} 
-		else if ( running && currentRunSpeed < runSpeedMax )  {
-			currentRunSpeed += runSpeedIncrement;
-
-			if ( runSpeedMax < currentRunSpeed ) {
-				currentRunSpeed = runSpeedMax;
-			}
-		}
-
 		Move (
-			normalSpeed + currentRunSpeed,
+			normalSpeed + dashController.DashSpeed (),
 			horizontalMovementStickInput,
 			verticalMovementStickInput,
 			upDirection,
@@ -204,12 +184,8 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 			upDirection	
 		);
 
+		// 7. update rotation
 		DesiredRotation ( desiredRotation );
-
-		// 7. check if desired rotation is not the zero vector: if so, there is no change in rotation
-		//if ( !desiredRotation.eulerAngles.Equals ( Vector3.zero ) ) {
-		//	DesiredRotation ( desiredRotation );
-		//}
 
 		// 10. maintain original y-axis velocity, i.e. gravity or jumping 
 		newVelocity.y = rigidBody.velocity.y * timeManipulatableController.TimeFactor ();
@@ -230,7 +206,7 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 		newRotation.z = rigidBody.rotation.z;
 
 		// 9. apply new rotation to rigidBody
-		rigidBody.rotation = newRotation;
+		rigidBody.MoveRotation ( newRotation );
 	}
 
 	public virtual void AttackButton ( bool clicked ) {
@@ -239,12 +215,14 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 
 	public virtual void RunButton (  bool clicked ) {
 		if ( onGround () ) {
-			running = clicked;
-		} 
+			dashController.Dash ( clicked );
+		}
 	}
 
-	public virtual void Slide ( bool clicked ) {
-		// TODO: deprecated?
+	public virtual void BoostButton ( bool clicked ) {
+		if ( clicked ) {
+			//boostController.ApplyBoost ( rigidBody );
+		}
 	}
 
 	public virtual void JumpButton ( bool clicked ) {
@@ -292,14 +270,7 @@ public abstract class BodyVirtualController : MonoBehaviour , IVirtualController
 	}
 
 	public virtual void TimeStopButton ( bool clicked ) {
-		timeStopping = clicked;
-		if ( timeSlowing ) {
-			//timeManipulatorController.TimeStop ();	
-		}
-
-		else if ( !timePausing && !timeSlowing ) {
-			//timeManipulatorController.TimeRestore ();
-		}
+		timeStopping = clicked; // TODO: implement game pause
 	}
 
 	void OnTriggerEnter ( Collider collider ) {

@@ -10,9 +10,8 @@ public class PlayerInputController : MonoBehaviour , IInputController {
 	private const string INPUT_VIEW_STICK_VERTICAL = "Mouse Y";
 
 	private const string INPUT_JUMP_BUTTON = "Jump";
-	private const string INPUT_RUN_BUTTON = "Run";
+	private const string INPUT_DASH_BUTTON = "Dash";
 	private const string INPUT_ATTACK_BUTTON = "Attack";
-	private const string INPUT_RUN_TRIGGER_BUTTON = "Running";
 	private const string INPUT_TIME_SLOWING_BUTTON = "Time Slowing";
 	private const string INPUT_TIME_PAUSING_BUTTON = "Time Pausing";
 
@@ -23,8 +22,8 @@ public class PlayerInputController : MonoBehaviour , IInputController {
 	float verticalViewStickInput = 0.0f;
 
 	bool inputEnabled = true;
+	bool dashButtonHeld = false;
 	bool jumpButtonPressed = false;
-	bool runButtonPressed = false;
 	bool lightAttackButtonPressed = false;
 	bool heavyAttackButtonPressed = false;
 	bool timeSlowButtonPressed = false;
@@ -46,7 +45,7 @@ public class PlayerInputController : MonoBehaviour , IInputController {
 		if ( !inputEnabled ) {
 			return;
 		}
-
+			
 		horizontalMovementStickInput = Input.GetAxis ( INPUT_MOVEMENT_STICK_HORIZONTAL );
 		verticalMovementStickInput = Input.GetAxis ( INPUT_MOVEMENT_STICK_VERTICAL );
 
@@ -67,6 +66,11 @@ public class PlayerInputController : MonoBehaviour , IInputController {
 			verticalViewStickInput = 0.0f;
 		}
 
+		// held input that must return true or false
+		bool leftTriggerInput = 0f < Input.GetAxis ( INPUT_DASH_BUTTON );
+		dashButtonHeld = leftTriggerInput;
+
+		// pressed input that must return true only when pressed
 		if ( Input.GetButtonDown ( INPUT_JUMP_BUTTON ) ) {
 			jumpButtonPressed = true;
 		}
@@ -79,10 +83,6 @@ public class PlayerInputController : MonoBehaviour , IInputController {
 			heavyAttackButtonPressed = true;
 		}
 
-		if ( Input.GetButtonDown ( INPUT_RUN_BUTTON ) ) {
-			runButtonPressed = true;
-		}
-
 		if ( Input.GetButtonDown ( INPUT_TIME_PAUSING_BUTTON ) ) {
 			timePauseButtonPressed = true;
 		}
@@ -91,16 +91,7 @@ public class PlayerInputController : MonoBehaviour , IInputController {
 			timeSlowButtonPressed = true;
 		}
 	}
-
-	// update camera movement after physics and movement
-	void LateUpdate () {
-		cameraController.UpdateCameraPositioning (
-			horizontalViewStickInput,
-			verticalViewStickInput,
-			GetPosition ()
-		);
-	}
-
+		
 	// rigidbody and physics calculations 
 	void FixedUpdate () {
 
@@ -109,11 +100,10 @@ public class PlayerInputController : MonoBehaviour , IInputController {
 			jumpButtonPressed = false;
 		}
 
-		if ( runButtonPressed ) {
-			//virtualController.RunButton ( runButtonPressed );
-			//runButtonPressed = false;
-		}
+		// held input that must return both true and false
+		virtualController.RunButton ( dashButtonHeld );
 
+		// pressed input that must only return true when pressed
 		if ( lightAttackButtonPressed ) {
 			virtualController.AttackButton ( lightAttackButtonPressed );
 			lightAttackButtonPressed = false;
@@ -143,6 +133,13 @@ public class PlayerInputController : MonoBehaviour , IInputController {
 			cameraController.GetCameraForwardDirection (),
 			cameraController.GetCameraSideDirection ()
 		);
+
+		cameraController.UpdateCameraPositioning (
+			horizontalViewStickInput,
+			verticalViewStickInput,
+			GetPosition ()
+		);
+
 	}
 
 	private void SetVirtualController () {

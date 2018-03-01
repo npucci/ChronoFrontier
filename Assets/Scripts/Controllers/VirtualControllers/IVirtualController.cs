@@ -24,9 +24,9 @@ public interface IVirtualController {
 
 	void RunButton ( bool clicked );
 
-	void Slide ( bool clicked );
-
 	void JumpButton ( bool clicked );
+
+	void BoostButton ( bool clicked );
 
 	void InteractionButton ( bool clicked );
 
